@@ -1722,6 +1722,7 @@ def change_password():
 @login_required
 @admin_required
 def admin_backups():
+    os.makedirs(BACKUP_FOLDER, exist_ok=True)
     files = sorted(os.listdir(BACKUP_FOLDER), reverse=True)
     backups = []
     for f in files:
