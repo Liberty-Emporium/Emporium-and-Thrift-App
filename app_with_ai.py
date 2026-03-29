@@ -22,13 +22,14 @@ app.secret_key = os.environ.get('SECRET_KEY', 'liberty-emporium-secret-2026')
 
 # ── Paths ────────────────────────────────────────────────────────────────────
 BASE_DIR       = os.path.dirname(os.path.abspath(__file__))
-INVENTORY_FILE = os.path.join(BASE_DIR, 'inventory.csv')
-UPLOAD_FOLDER  = os.path.join(BASE_DIR, 'uploads')
-MUSIC_FOLDER   = os.path.join(BASE_DIR, 'music')
-BACKUP_FOLDER  = os.path.join(BASE_DIR, 'backups')
-ADS_FOLDER     = os.path.join(BASE_DIR, 'ads')
-USERS_FILE     = os.path.join(BASE_DIR, 'users.json')
-PENDING_FILE   = os.path.join(BASE_DIR, 'pending_users.json')
+DATA_DIR       = os.environ.get('DATA_DIR', BASE_DIR)
+INVENTORY_FILE = os.path.join(DATA_DIR, 'inventory.csv')
+UPLOAD_FOLDER  = os.path.join(DATA_DIR, 'uploads')
+MUSIC_FOLDER   = os.path.join(DATA_DIR, 'music')
+BACKUP_FOLDER  = os.path.join(DATA_DIR, 'backups')
+ADS_FOLDER     = os.path.join(DATA_DIR, 'ads')
+USERS_FILE     = os.path.join(DATA_DIR, 'users.json')
+PENDING_FILE   = os.path.join(DATA_DIR, 'pending_users.json')
 
 for d in [UPLOAD_FOLDER, BACKUP_FOLDER, ADS_FOLDER, MUSIC_FOLDER]:
     os.makedirs(d, exist_ok=True)
