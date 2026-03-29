@@ -1,0 +1,189 @@
+{% extends 'base.html' %}
+{% block title %}Team & Permissions | Liberty Emporium{% endblock %}
+
+{% block content %}
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600;700&display=swap');
+  :root{--ink:#1a1208;--cream:#FAF6EE;--gold:#D4A017;--crimson:#8B0000;--border:rgba(212,160,23,0.2);--card:#FFFDF8;}
+  body{background:var(--cream);}
+  .page-hero{background:linear-gradient(135deg,#1a0a0a 0%,#3d0a0a 100%);padding:2.5rem 2rem 2rem;border-bottom:3px solid var(--gold);position:relative;overflow:hidden;}
+  .page-hero::before{content:'';position:absolute;inset:0;background:repeating-linear-gradient(45deg,transparent,transparent 28px,rgba(212,160,23,0.04) 28px,rgba(212,160,23,0.04) 29px);}
+  .hero-inner{max-width:1000px;margin:0 auto;position:relative;}
+  .hero-badge{display:inline-block;background:var(--gold);color:#1a0a0a;font-family:'DM Sans',sans-serif;font-size:.68rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase;padding:.25rem .9rem;border-radius:3px;margin-bottom:.75rem;}
+  .hero-title{font-family:'Playfair Display',serif;font-size:2.2rem;font-weight:900;color:#fff;margin:0 0 .35rem;}
+  .hero-title span{color:var(--gold);}
+  .hero-sub{font-family:'DM Sans',sans-serif;color:rgba(255,255,255,0.5);font-size:.9rem;margin:0;}
+  .role-legend{max-width:1000px;margin:1.5rem auto 0;padding:0 1.5rem;display:flex;gap:.6rem;flex-wrap:wrap;}
+  .role-chip{display:inline-flex;align-items:center;gap:.4rem;padding:.3rem .85rem;border-radius:50px;font-family:'DM Sans',sans-serif;font-size:.78rem;font-weight:700;border:1.5px solid currentColor;}
+  .role-dot{width:8px;height:8px;border-radius:50%;background:currentColor;}
+  .content-wrap{max-width:1000px;margin:1.5rem auto 4rem;padding:0 1.5rem;}
+  .matrix-card,.section-card{background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden;box-shadow:0 2px 16px rgba(139,0,0,.07);margin-bottom:1.5rem;}
+  .matrix-header{background:linear-gradient(135deg,#1a0a0a,#2d0e0e);padding:1rem 1.5rem;}
+  .matrix-header h2{font-family:'Playfair Display',serif;color:var(--gold);font-size:1.1rem;margin:0;}
+  .matrix-table{width:100%;border-collapse:collapse;}
+  .matrix-table th{padding:.7rem 1rem;font-family:'DM Sans',sans-serif;font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#888;text-align:center;background:#fdf8f0;border-bottom:1px solid var(--border);}
+  .matrix-table th:first-child{text-align:left;}
+  .matrix-table td{padding:.65rem 1rem;font-family:'DM Sans',sans-serif;font-size:.875rem;border-bottom:1px solid rgba(212,160,23,.08);text-align:center;color:var(--ink);}
+  .matrix-table td:first-child{text-align:left;font-weight:500;}
+  .matrix-table tr:last-child td{border-bottom:none;}
+  .matrix-table tr:hover td{background:#fdf8f0;}
+  .check{color:#1a8a4a;font-size:1.1rem;} .cross{color:#ccc;}
+  .section-head{padding:1rem 1.5rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:1rem;}
+  .section-head h2{font-family:'Playfair Display',serif;font-size:1.05rem;color:var(--ink);margin:0;display:flex;align-items:center;gap:.5rem;}
+  .count-badge{background:var(--crimson);color:#fff;font-family:'DM Sans',sans-serif;font-size:.7rem;font-weight:700;padding:.15rem .55rem;border-radius:50px;}
+  .user-row,.pending-row{display:flex;align-items:center;gap:1rem;padding:.9rem 1.5rem;border-bottom:1px solid rgba(212,160,23,.07);flex-wrap:wrap;transition:background .15s;}
+  .user-row:last-child,.pending-row:last-child{border-bottom:none;}
+  .user-row:hover{background:#fdf8f0;}
+  .pending-row{background:#fffbf2;}
+  .user-avatar{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'DM Sans',sans-serif;font-weight:700;font-size:1rem;color:#fff;flex-shrink:0;}
+  .user-info,.pending-info{flex:1;min-width:120px;}
+  .user-name,.pending-name{font-family:'DM Sans',sans-serif;font-weight:700;font-size:.95rem;color:var(--ink);}
+  .user-email,.pending-detail{font-family:'DM Sans',sans-serif;font-size:.78rem;color:#999;margin-top:.1rem;}
+  .role-badge{display:inline-block;padding:.25rem .75rem;border-radius:50px;font-family:'DM Sans',sans-serif;font-size:.72rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:#fff;}
+  .role-form{display:flex;align-items:center;gap:.5rem;}
+  .role-select{border:1.5px solid var(--border);background:var(--card);font-family:'DM Sans',sans-serif;font-size:.82rem;color:var(--ink);padding:.35rem .65rem;border-radius:7px;cursor:pointer;outline:none;transition:border-color .2s;}
+  .role-select:focus{border-color:var(--gold);}
+  .btn-save-role{background:var(--gold);color:#1a0a0a;font-family:'DM Sans',sans-serif;font-weight:700;font-size:.78rem;padding:.35rem .8rem;border-radius:7px;border:none;cursor:pointer;transition:background .2s;white-space:nowrap;}
+  .btn-save-role:hover{background:#F5D060;}
+  .user-actions,.pending-actions{display:flex;gap:.5rem;align-items:center;flex-shrink:0;flex-wrap:wrap;}
+  .btn-remove{background:none;border:1.5px solid #e0c0c0;color:#c0392b;font-family:'DM Sans',sans-serif;font-size:.78rem;font-weight:600;padding:.35rem .8rem;border-radius:7px;cursor:pointer;transition:all .2s;}
+  .btn-remove:hover{background:#c0392b;color:#fff;border-color:#c0392b;}
+  .approve-form{display:flex;gap:.4rem;align-items:center;flex-wrap:wrap;}
+  .btn-approve{background:#1a6e4a;color:#fff;font-family:'DM Sans',sans-serif;font-weight:700;font-size:.78rem;padding:.4rem .9rem;border-radius:7px;border:none;cursor:pointer;transition:background .2s;white-space:nowrap;}
+  .btn-approve:hover{background:#155c3d;}
+  .btn-reject{background:none;border:1.5px solid #e0c0c0;color:#c0392b;font-family:'DM Sans',sans-serif;font-weight:700;font-size:.78rem;padding:.38rem .8rem;border-radius:7px;cursor:pointer;transition:all .2s;}
+  .btn-reject:hover{background:#c0392b;color:#fff;border-color:#c0392b;}
+  .empty-msg{padding:1.5rem;text-align:center;font-family:'DM Sans',sans-serif;color:#bbb;font-size:.9rem;}
+  .back-link{display:inline-flex;align-items:center;gap:.3rem;font-family:'DM Sans',sans-serif;font-size:.85rem;color:var(--crimson);text-decoration:none;font-weight:600;margin-bottom:1.5rem;}
+  .back-link:hover{text-decoration:underline;}
+</style>
+
+<div class="page-hero">
+  <div class="hero-inner">
+    <div class="hero-badge">👥 Liberty Emporium</div>
+    <h1 class="hero-title">Team &amp; <span>Permissions</span></h1>
+    <p class="hero-sub">Manage employee roles and control what each person can do</p>
+  </div>
+</div>
+
+<div class="role-legend">
+  {% for role_key, role_info in roles.items() %}
+  <span class="role-chip" style="color:{{ role_info.color }};">
+    <span class="role-dot"></span>{{ role_info.label }}
+  </span>
+  {% endfor %}
+</div>
+
+<div class="content-wrap">
+  <a href="{{ url_for('dashboard') }}" class="back-link">← Back to Dashboard</a>
+
+  <!-- Permission Matrix -->
+  <div class="matrix-card">
+    <div class="matrix-header"><h2>🔐 What each role can do</h2></div>
+    <table class="matrix-table">
+      <thead>
+        <tr>
+          <th>Permission</th>
+          <th style="color:#8B0000;">Owner</th>
+          <th style="color:#1a6e4a;">Manager</th>
+          <th style="color:#1a5a8e;">Staff</th>
+          <th style="color:#666;">Viewer</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>Add products</td><td><span class="check">✓</span></td><td><span class="check">✓</span></td><td><span class="check">✓</span></td><td><span class="cross">—</span></td></tr>
+        <tr><td>Edit products</td><td><span class="check">✓</span></td><td><span class="check">✓</span></td><td><span class="check">✓</span></td><td><span class="cross">—</span></td></tr>
+        <tr><td>Delete products</td><td><span class="check">✓</span></td><td><span class="check">✓</span></td><td><span class="cross">—</span></td><td><span class="cross">—</span></td></tr>
+        <tr><td>Print price tags</td><td><span class="check">✓</span></td><td><span class="check">✓</span></td><td><span class="check">✓</span></td><td><span class="cross">—</span></td></tr>
+        <tr><td>Generate ads</td><td><span class="check">✓</span></td><td><span class="check">✓</span></td><td><span class="cross">—</span></td><td><span class="cross">—</span></td></tr>
+        <tr><td>Delete ads</td><td><span class="check">✓</span></td><td><span class="check">✓</span></td><td><span class="cross">—</span></td><td><span class="cross">—</span></td></tr>
+        <tr><td>Export / Import Square</td><td><span class="check">✓</span></td><td><span class="check">✓</span></td><td><span class="cross">—</span></td><td><span class="cross">—</span></td></tr>
+        <tr><td>Manage team</td><td><span class="check">✓</span></td><td><span class="cross">—</span></td><td><span class="cross">—</span></td><td><span class="cross">—</span></td></tr>
+        <tr><td>Backups &amp; settings</td><td><span class="check">✓</span></td><td><span class="cross">—</span></td><td><span class="cross">—</span></td><td><span class="cross">—</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Pending Approvals -->
+  <div class="section-card">
+    <div class="section-head">
+      <h2>⏳ Pending Requests <span class="count-badge">{{ pending|length }}</span></h2>
+    </div>
+    {% if pending %}
+      {% for user in pending %}
+      <div class="pending-row">
+        <div class="user-avatar" style="background:#b08010;">{{ user.username[0].upper() }}</div>
+        <div class="pending-info">
+          <div class="pending-name">{{ user.username }}</div>
+          <div class="pending-detail">{{ user.email or 'No email' }} · Requested {{ user.requested }}</div>
+        </div>
+        <div class="pending-actions">
+          <form method="POST" action="{{ url_for('approve_user', username=user.username) }}" class="approve-form">
+            <select name="role" class="role-select" title="Assign role on approval">
+              <option value="staff" selected>Staff</option>
+              <option value="manager">Manager</option>
+              <option value="viewer">Viewer</option>
+            </select>
+            <button type="submit" class="btn-approve">✅ Approve</button>
+          </form>
+          <form method="POST" action="{{ url_for('reject_user', username=user.username) }}"
+                onsubmit="return confirm('Reject {{ user.username }}?')">
+            <button type="submit" class="btn-reject">✕ Reject</button>
+          </form>
+        </div>
+      </div>
+      {% endfor %}
+    {% else %}
+      <div class="empty-msg">No pending requests — you're all caught up 🎉</div>
+    {% endif %}
+  </div>
+
+  <!-- Active Team -->
+  <div class="section-card">
+    <div class="section-head">
+      <h2>✅ Active Team <span class="count-badge">{{ approved|length + 1 }}</span></h2>
+    </div>
+
+    <!-- Owner row -->
+    <div class="user-row">
+      <div class="user-avatar" style="background:#8B0000;">A</div>
+      <div class="user-info">
+        <div class="user-name">{{ demo_username }}</div>
+        <div class="user-email">Store owner account</div>
+      </div>
+      <span class="role-badge" style="background:#8B0000;">👑 Owner</span>
+    </div>
+
+    {% for user in approved %}
+    {% set bg = {'manager':'#1a6e4a','staff':'#1a5a8e','viewer':'#666'}.get(user.role,'#666') %}
+    <div class="user-row">
+      <div class="user-avatar" style="background:{{ bg }};">{{ user.username[0].upper() }}</div>
+      <div class="user-info">
+        <div class="user-name">{{ user.username }}</div>
+        <div class="user-email">{{ user.email or '—' }}{% if user.approved %} · Joined {{ user.approved }}{% endif %}</div>
+      </div>
+      <form method="POST" action="{{ url_for('change_role', username=user.username) }}" class="role-form">
+        <select name="role" class="role-select" onchange="this.closest('form').querySelector('.btn-save-role').style.display='inline-block'">
+          {% for rk, rv in roles.items() %}
+          {% if rk != 'owner' %}
+          <option value="{{ rk }}"{% if rk == user.role %} selected{% endif %}>{{ rv.label }}</option>
+          {% endif %}
+          {% endfor %}
+        </select>
+        <button type="submit" class="btn-save-role" style="display:none;">Save</button>
+      </form>
+      <div class="user-actions">
+        <form method="POST" action="{{ url_for('remove_user', username=user.username) }}"
+              onsubmit="return confirm('Remove {{ user.username }} from your team?')">
+          <button type="submit" class="btn-remove">Remove</button>
+        </form>
+      </div>
+    </div>
+    {% endfor %}
+
+    {% if not approved %}
+    <div class="empty-msg">No team members yet. Approve a signup request above to add someone.</div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

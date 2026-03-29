@@ -1,0 +1,190 @@
+{% extends 'base.html' %}
+{% block title %}Login | {{ store_name }}{% endblock %}
+
+{% block content %}
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@400;500;600&display=swap');
+
+  .login-wrap {
+    min-height: 80vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem 1rem;
+    background: #FAF6EE;
+  }
+
+  .login-card {
+    background: #FFFDF8;
+    border: 1px solid rgba(212,160,23,0.25);
+    border-top: 4px solid #8B0000;
+    border-radius: 16px;
+    padding: 2.5rem 2rem;
+    width: 100%;
+    max-width: 420px;
+    box-shadow: 0 8px 32px rgba(139,0,0,0.10);
+  }
+
+  .login-logo {
+    text-align: center;
+    margin-bottom: 1.5rem;
+  }
+  .login-logo-icon { font-size: 2.5rem; }
+  .login-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.8rem;
+    font-weight: 900;
+    color: #1a1208;
+    text-align: center;
+    margin: 0.25rem 0 0.3rem;
+  }
+  .login-store {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.82rem;
+    color: #aaa;
+    text-align: center;
+    margin: 0 0 2rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+
+  .field { margin-bottom: 1.1rem; }
+  .field label {
+    display: block;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: #666;
+    margin-bottom: 0.4rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+  .field-wrap { position: relative; }
+  .field input {
+    width: 100%;
+    padding: 0.72rem 2.8rem 0.72rem 1rem;
+    border: 1.5px solid rgba(212,160,23,0.3);
+    border-radius: 8px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.95rem;
+    color: #1a1208;
+    background: #fff;
+    outline: none;
+    transition: border-color 0.2s;
+    box-sizing: border-box;
+  }
+  .field input:focus { border-color: #8B0000; }
+
+  .toggle-eye {
+    position: absolute; right: 0.75rem; top: 50%; transform: translateY(-50%);
+    background: none; border: none; cursor: pointer; font-size: 1rem;
+    opacity: 0.35; transition: opacity 0.2s; padding: 0; line-height: 1;
+  }
+  .toggle-eye:hover { opacity: 0.75; }
+
+  .btn-login {
+    width: 100%; padding: 0.85rem;
+    background: linear-gradient(135deg, #8B0000, #b00000);
+    color: #fff; font-family: 'DM Sans', sans-serif; font-weight: 700;
+    font-size: 1rem; border: none; border-radius: 9px;
+    cursor: pointer; transition: all 0.2s; letter-spacing: 0.02em;
+    margin-top: 0.5rem;
+  }
+  .btn-login:hover {
+    background: linear-gradient(135deg, #a00000, #cc0000);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 16px rgba(139,0,0,0.3);
+  }
+
+  .divider {
+    display: flex; align-items: center; gap: 0.75rem;
+    margin: 1.5rem 0; color: #ccc; font-size: 0.8rem;
+    font-family: 'DM Sans', sans-serif;
+  }
+  .divider::before, .divider::after {
+    content: ''; flex: 1; height: 1px; background: rgba(212,160,23,0.2);
+  }
+
+  .link-row {
+    display: flex; justify-content: space-between; align-items: center;
+    flex-wrap: wrap; gap: 0.5rem;
+    font-family: 'DM Sans', sans-serif; font-size: 0.83rem;
+    margin-top: 1.25rem;
+  }
+  .link-row a { color: #8B0000; text-decoration: none; font-weight: 500; }
+  .link-row a:hover { text-decoration: underline; }
+
+  .btn-guest {
+    width: 100%; padding: 0.7rem;
+    background: none; border: 1.5px solid rgba(212,160,23,0.4);
+    color: #888; font-family: 'DM Sans', sans-serif; font-weight: 600;
+    font-size: 0.9rem; border-radius: 9px; cursor: pointer; transition: all 0.2s;
+    text-decoration: none; display: block; text-align: center;
+  }
+  .btn-guest:hover { border-color: #D4A017; color: #5a4a00; }
+
+  .flash-msg {
+    padding: 0.7rem 1rem; border-radius: 8px;
+    font-family: 'DM Sans', sans-serif; font-size: 0.88rem;
+    margin-bottom: 1.2rem;
+  }
+  .flash-success { background: #edfaf1; border: 1px solid #a3d9b1; color: #1a6e2e; }
+  .flash-error   { background: #fef0f0; border: 1px solid #f5c0c0; color: #a00; }
+</style>
+
+<div class="login-wrap">
+  <div class="login-card">
+
+    <div class="login-logo">
+      <div class="login-logo-icon">🏛</div>
+      <h1 class="login-title">Welcome Back</h1>
+      <p class="login-store">{{ store_name }}</p>
+    </div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% for cat, msg in messages %}
+      <div class="flash-msg flash-{{ 'success' if cat == 'success' else 'error' }}">
+        {{ '✅' if cat == 'success' else '❌' }} {{ msg }}
+      </div>
+      {% endfor %}
+    {% endwith %}
+
+    <form method="POST">
+      <div class="field">
+        <label>Username</label>
+        <input type="text" name="username" required placeholder="Enter your username" autofocus>
+      </div>
+
+      <div class="field">
+        <label>Password</label>
+        <div class="field-wrap">
+          <input type="password" name="password" id="pw" required placeholder="Enter your password">
+          <button type="button" class="toggle-eye" onclick="toggleVis()">👁</button>
+        </div>
+      </div>
+
+      <button type="submit" class="btn-login">🔐 Sign In</button>
+    </form>
+
+    <div class="link-row">
+      <a href="{{ url_for('signup') }}">📝 Request an account</a>
+      <a href="{{ url_for('forgot_password') }}">🔑 Forgot password?</a>
+    </div>
+
+    {% if demo_mode %}
+    <div class="divider">or</div>
+    <a href="{{ url_for('guest') }}" class="btn-guest">👁 Browse as Guest</a>
+    {% endif %}
+
+  </div>
+</div>
+
+<script>
+function toggleVis() {
+  const inp = document.getElementById('pw');
+  const btn = document.querySelector('.toggle-eye');
+  if (inp.type === 'password') { inp.type = 'text'; btn.style.opacity = '0.8'; }
+  else { inp.type = 'password'; btn.style.opacity = '0.35'; }
+}
+</script>
+{% endblock %}

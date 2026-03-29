@@ -1,0 +1,1402 @@
+{% extends 'base.html' %}
+
+{% block title %}Ad Generator | Liberty Emporium{% endblock %}
+
+{% block content %}
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500&display=swap');
+
+  .ad-gen-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 2.5rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 2px solid #e8e0d4;
+  }
+
+  .ad-gen-header h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.4rem;
+    color: #1a1a2e;
+    letter-spacing: -0.02em;
+  }
+
+  .ad-gen-header p {
+    color: #7a7a8c;
+    font-size: 0.95rem;
+    margin-top: 0.4rem;
+    font-family: 'DM Sans', sans-serif;
+  }
+
+  .selection-info {
+    background: linear-gradient(135deg, #1a1a2e 0%, #2d2d5a 100%);
+    color: white;
+    padding: 1rem 1.5rem;
+    border-radius: 12px;
+    text-align: center;
+    min-width: 140px;
+  }
+
+  .selection-count {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.5rem;
+    font-weight: 900;
+    line-height: 1;
+    color: #f0c040;
+  }
+
+  .selection-label {
+    font-size: 0.75rem;
+    opacity: 0.8;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-top: 0.25rem;
+    font-family: 'DM Sans', sans-serif;
+  }
+
+  /* Ad Style Picker */
+  .style-picker {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+  }
+
+  .style-picker h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.2rem;
+    color: #1a1a2e;
+    margin-bottom: 1rem;
+  }
+
+  .style-options {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+  }
+
+  .style-option {
+    border: 2px solid #e0ddd8;
+    border-radius: 10px;
+    padding: 0.75rem 1.25rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.875rem;
+    background: white;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .style-option:hover {
+    border-color: #1a1a2e;
+    background: #f8f7f5;
+  }
+
+  .style-option.active {
+    border-color: #1a1a2e;
+    background: #1a1a2e;
+    color: white;
+  }
+
+  .style-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    display: inline-block;
+  }
+
+  /* Products Grid */
+  .products-selection-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 1.25rem;
+    margin-bottom: 2rem;
+  }
+
+  .selectable-card {
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+    cursor: pointer;
+    transition: all 0.25s;
+    border: 2.5px solid transparent;
+    position: relative;
+  }
+
+  .selectable-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+  }
+
+  .selectable-card.selected {
+    border-color: #1a1a2e;
+    box-shadow: 0 8px 24px rgba(26,26,46,0.2);
+  }
+
+  .select-checkbox {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: white;
+    border: 2.5px solid #ddd;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2;
+    transition: all 0.2s;
+    font-size: 14px;
+  }
+
+  .selectable-card.selected .select-checkbox {
+    background: #1a1a2e;
+    border-color: #1a1a2e;
+    color: white;
+  }
+
+  .card-img {
+    height: 180px;
+    background: #f0ede8;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+
+  .card-img img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .card-img .no-img-text {
+    color: #b0aaa0;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.875rem;
+  }
+
+  .card-body {
+    padding: 1rem 1.1rem 1.1rem;
+  }
+
+  .card-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1rem;
+    color: #1a1a2e;
+    margin-bottom: 0.3rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .card-sku {
+    font-size: 0.75rem;
+    color: #a0a0b0;
+    font-family: 'DM Sans', sans-serif;
+    margin-bottom: 0.5rem;
+  }
+
+  .card-footer-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .card-price {
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 500;
+    color: #27ae60;
+    font-size: 1.1rem;
+  }
+
+  .card-status {
+    font-size: 0.7rem;
+    padding: 0.2rem 0.6rem;
+    border-radius: 20px;
+    text-transform: uppercase;
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 500;
+  }
+
+  .btn-video {
+    width: 100%;
+    margin-top: 0.6rem;
+    padding: 0.45rem 0;
+    background: linear-gradient(135deg, #e74c3c, #c0392b);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.8rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.3rem;
+  }
+
+  .btn-video:hover { background: linear-gradient(135deg, #c0392b, #96281b); transform: translateY(-1px); }
+  .btn-video:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+  /* Music Picker */
+  .music-picker {
+    background: white;
+    border-radius: 12px;
+    padding: 1.25rem 1.5rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+  }
+  .music-picker h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.1rem;
+    color: #1a1a2e;
+    white-space: nowrap;
+    margin: 0;
+  }
+  .music-options {
+    display: flex;
+    gap: 0.6rem;
+    flex-wrap: wrap;
+  }
+  .music-option {
+    border: 2px solid #e0ddd8;
+    border-radius: 10px;
+    padding: 0.6rem 1.1rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.875rem;
+    background: white;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+  .music-option:hover { border-color: #1a1a2e; background: #f8f7f5; }
+  .music-option.active { border-color: #e74c3c; background: #e74c3c; color: white; }
+
+  .music-library-panel {
+    background: white;
+    border-radius: 12px;
+    padding: 1.25rem 1.5rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+  }
+  .music-lib-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1rem;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+  .music-upload-area {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+  .btn-upload-music {
+    background: linear-gradient(135deg,#1a1a2e,#2d2d5a);
+    color: #f0c040;
+    border: none;
+    border-radius: 8px;
+    padding: 0.5rem 1.1rem;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.2s;
+    white-space: nowrap;
+  }
+  .btn-upload-music:hover { opacity: 0.85; }
+  .music-lib-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 0.6rem;
+  }
+  .music-track-card {
+    border: 2px solid #e8e4de;
+    border-radius: 10px;
+    padding: 0.7rem 0.9rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    background: white;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+  }
+  .music-track-card:hover { border-color: #e74c3c; background: #fff5f5; }
+  .music-track-card.selected { border-color: #e74c3c; background: #e74c3c; color: white; }
+  .music-track-info { flex:1; min-width:0; }
+  .music-track-name {
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 600;
+    font-size: 0.85rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .music-track-meta {
+    font-size: 0.7rem;
+    opacity: 0.7;
+    margin-top: 0.1rem;
+  }
+  .music-track-card.selected .music-track-meta { opacity: 0.85; }
+  .btn-delete-music {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 0.9rem;
+    opacity: 0.5;
+    padding: 0.1rem 0.2rem;
+    border-radius: 4px;
+    transition: opacity 0.2s;
+    flex-shrink: 0;
+  }
+  .btn-delete-music:hover { opacity: 1; background: rgba(0,0,0,0.1); }
+  .music-track-card.selected .btn-delete-music { opacity: 0.7; color: white; }
+
+  .video-result-section {
+    margin-top: 2.5rem;
+    padding-top: 2rem;
+    border-top: 2px solid #e8e0d4;
+    display: none;
+  }
+  .video-result-section.visible { display: block; }
+  .video-result-section h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.8rem;
+    color: #1a1a2e;
+    margin-bottom: 1.5rem;
+  }
+  .video-cards-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    gap: 1.5rem;
+  }
+  .video-card {
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+    border-top: 4px solid #e74c3c;
+  }
+  .video-card video {
+    width: 100%;
+    display: block;
+  }
+  .video-card-footer {
+    padding: 0.85rem 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.75rem;
+  }
+  .video-card-title {
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 500;
+    font-size: 0.9rem;
+    color: #1a1a2e;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .status-available { background: #d4edda; color: #155724; }
+  .status-sold { background: #f8d7da; color: #721c24; }
+
+  /* Generate Button */
+  .generate-bar {
+    position: sticky;
+    bottom: 1rem;
+    background: white;
+    border-radius: 16px;
+    padding: 1.25rem 1.75rem;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    z-index: 100;
+    border: 1.5px solid #e8e4de;
+  }
+
+  .generate-bar-info {
+    font-family: 'DM Sans', sans-serif;
+    color: #5a5a6e;
+    font-size: 0.9rem;
+  }
+
+  .generate-bar-info strong {
+    color: #1a1a2e;
+    font-size: 1.1rem;
+  }
+
+  .btn-generate {
+    background: linear-gradient(135deg, #1a1a2e 0%, #2d2d5a 100%);
+    color: white;
+    border: none;
+    padding: 0.9rem 2rem;
+    border-radius: 10px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    white-space: nowrap;
+  }
+
+  .btn-generate:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(26,26,46,0.4);
+  }
+
+  .btn-generate:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+  }
+
+  .btn-generate .gold-icon {
+    color: #f0c040;
+    font-size: 1.1rem;
+  }
+
+  .btn-vault {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin-top: 0.75rem;
+    padding: 0.75rem 1.6rem;
+    background: linear-gradient(135deg, #1a0a0a, #3d0a0a);
+    color: #D4A017;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+    border: 2px solid #D4A017;
+    border-radius: 10px;
+    text-decoration: none;
+    letter-spacing: 0.03em;
+    transition: all 0.2s;
+    box-shadow: 0 3px 14px rgba(139,0,0,0.25);
+  }
+  .btn-vault:hover {
+    background: #D4A017;
+    color: #1a0a0a;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 22px rgba(212,160,23,0.4);
+  }
+
+  /* Toast banner after generation */
+  .vault-toast {
+    display: none;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    background: linear-gradient(135deg, #1a0a0a 0%, #3d0a0a 100%);
+    border: 1.5px solid #D4A017;
+    border-radius: 12px;
+    padding: 1rem 1.5rem;
+    margin-top: 1.5rem;
+    box-shadow: 0 4px 20px rgba(139,0,0,0.2);
+    animation: slideDown 0.4s ease;
+  }
+  .vault-toast.visible { display: flex; }
+  @keyframes slideDown {
+    from { opacity: 0; transform: translateY(-12px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .vault-toast-text {
+    font-family: 'DM Sans', sans-serif;
+    color: #fff;
+    font-size: 0.95rem;
+  }
+  .vault-toast-text strong { color: #D4A017; }
+  .vault-toast-btn {
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    background: #D4A017;
+    color: #1a0a0a;
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 700;
+    font-size: 0.9rem;
+    padding: 0.5rem 1.25rem;
+    border-radius: 7px;
+    text-decoration: none;
+    transition: background 0.2s;
+    white-space: nowrap;
+  }
+  .vault-toast-btn:hover { background: #F5D060; }
+
+
+  .generated-ads-section {
+    margin-top: 3rem;
+    padding-top: 2rem;
+    border-top: 2px solid #e8e0d4;
+    display: none;
+  }
+
+  .generated-ads-section.visible {
+    display: block;
+  }
+
+  .generated-ads-section h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.8rem;
+    color: #1a1a2e;
+    margin-bottom: 1.5rem;
+  }
+
+  .ad-files-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1rem;
+  }
+
+  .ad-file-card {
+    background: white;
+    border-radius: 10px;
+    padding: 1.25rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    border-left: 4px solid #f0c040;
+  }
+
+  .ad-file-icon {
+    font-size: 2rem;
+    flex-shrink: 0;
+  }
+
+  .ad-file-info {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .ad-file-name {
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 500;
+    color: #1a1a2e;
+    font-size: 0.9rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .ad-file-meta {
+    font-size: 0.75rem;
+    color: #a0a0b0;
+    margin-top: 0.2rem;
+    font-family: 'DM Sans', sans-serif;
+  }
+
+  .ad-file-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+
+  .btn-view-ad, .btn-download-ad {
+    padding: 0.35rem 0.85rem;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    text-decoration: none;
+    text-align: center;
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 500;
+    transition: all 0.15s;
+    cursor: pointer;
+    border: none;
+  }
+
+  .btn-view-ad {
+    background: #1a1a2e;
+    color: white;
+  }
+
+  .btn-download-ad {
+    background: #f0f0f5;
+    color: #1a1a2e;
+  }
+
+  .btn-view-ad:hover { background: #2d2d5a; }
+  .btn-download-ad:hover { background: #e0e0ec; }
+
+  /* Loading overlay */
+  .loading-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(26,26,46,0.7);
+    z-index: 9999;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 1rem;
+    color: white;
+    font-family: 'DM Sans', sans-serif;
+  }
+
+  .loading-overlay.active {
+    display: flex;
+  }
+
+  .spinner-ring {
+    width: 56px;
+    height: 56px;
+    border: 4px solid rgba(255,255,255,0.2);
+    border-top-color: #f0c040;
+    border-radius: 50%;
+    animation: spin 0.9s linear infinite;
+  }
+
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+
+  .max-warning {
+    background: #fff3cd;
+    color: #856404;
+    border-radius: 8px;
+    padding: 0.6rem 1rem;
+    font-size: 0.85rem;
+    font-family: 'DM Sans', sans-serif;
+    display: none;
+    margin-bottom: 1rem;
+  }
+
+  .max-warning.visible { display: block; }
+
+  /* Image scroller */
+  .img-nav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(0,0,0,0.55);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 28px;
+    height: 28px;
+    font-size: 1.2rem;
+    line-height: 1;
+    cursor: pointer;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s;
+    padding: 0;
+  }
+  .img-nav:hover { background: rgba(0,0,0,0.82); }
+  .img-nav-prev { left: 6px; }
+  .img-nav-next { right: 6px; }
+  .img-dots {
+    position: absolute;
+    bottom: 5px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 4px;
+  }
+  .img-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.5);
+    transition: background 0.2s;
+  }
+  .img-dot.active { background: white; }
+  .img-counter {
+    position: absolute;
+    top: 6px;
+    right: 8px;
+    background: rgba(0,0,0,0.6);
+    color: white;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.7rem;
+    font-weight: 600;
+    padding: 2px 7px;
+    border-radius: 999px;
+    z-index: 10;
+    pointer-events: none;
+  }
+</style>
+
+<div class="ad-gen-header">
+  <div>
+    <h1>📣 Ad Generator</h1>
+    <p>Select up to 10 products and generate polished JPEG ads ready to post.</p>
+  </div>
+  <div class="selection-info">
+    <div class="selection-count" id="countDisplay">0</div>
+    <div class="selection-label">Selected</div>
+  </div>
+</div>
+
+<!-- Style Picker -->
+<div class="style-picker">
+  <h3>Choose Ad Style</h3>
+  <div class="style-options">
+    <button class="style-option active" data-style="elegant" onclick="selectStyle(this)">
+      <span class="style-dot" style="background:#cc0000"></span> Red &amp; Gold
+    </button>
+    <button class="style-option" data-style="bright" onclick="selectStyle(this)">
+      <span class="style-dot" style="background:#ff6600"></span> Orange &amp; Yellow
+    </button>
+    <button class="style-option" data-style="minimal" onclick="selectStyle(this)">
+      <span class="style-dot" style="background:#003366"></span> Navy &amp; White
+    </button>
+    <button class="style-option" data-style="vintage" onclick="selectStyle(this)">
+      <span class="style-dot" style="background:#8B4513"></span> Brown &amp; Gold
+    </button>
+  </div>
+</div>
+
+<div class="max-warning" id="maxWarning">
+  ⚠️ Maximum 10 products selected. Deselect one to choose another.
+</div>
+
+<!-- Music Library -->
+<div class="music-library-panel">
+  <div class="music-lib-header">
+    <div>
+      <h3 style="font-family:'Playfair Display',serif; font-size:1.15rem; color:#1a1a2e; margin:0 0 0.2rem;">🎵 Video Music Library</h3>
+      <p style="font-family:'DM Sans',sans-serif; font-size:0.8rem; color:#7a7a8c; margin:0;">Pick a song for your video ad. <span id="selectedMusicName" style="color:#e74c3c; font-weight:600;"></span></p>
+    </div>
+    {% if session.get('username') == 'admin' %}
+    <div class="music-upload-area">
+      <label for="musicFileInput" class="btn-upload-music" id="uploadLabel">➕ Add Song</label>
+      <input type="file" id="musicFileInput" accept=".mp3,.wav,.m4a,.aac" style="display:none;" onchange="uploadMusic(this)">
+      <span id="uploadStatus" style="font-family:'DM Sans',sans-serif; font-size:0.8rem; color:#27ae60; display:none;"></span>
+    </div>
+    <!-- Upload progress bar (hidden until uploading) -->
+    <div id="uploadProgressWrap" style="display:none; margin-top:0.75rem; width:100%;">
+      <div style="display:flex; justify-content:space-between; font-family:'DM Sans',sans-serif; font-size:0.78rem; color:#7a7a8c; margin-bottom:0.3rem;">
+        <span id="uploadFileName" style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:70%;"></span>
+        <span id="uploadPct">0%</span>
+      </div>
+      <div style="background:#f0ede8; border-radius:999px; height:8px; overflow:hidden;">
+        <div id="uploadBar" style="height:100%; width:0%; background:linear-gradient(90deg,#e74c3c,#f0c040); border-radius:999px; transition:width 0.2s;"></div>
+      </div>
+      <div id="uploadSpeed" style="font-family:'DM Sans',sans-serif; font-size:0.73rem; color:#a0a0b0; margin-top:0.25rem;"></div>
+    </div>
+    {% endif %}
+  </div>
+
+  <div class="music-lib-grid" id="musicLibGrid">
+    <div style="color:#a0a0b0; font-family:'DM Sans',sans-serif; font-size:0.875rem; padding:1rem 0; grid-column:1/-1;" id="musicLibEmpty">
+      Loading your music library…
+    </div>
+  </div>
+
+  <!-- Fallback: built-in styles if library is empty -->
+  <div id="builtinMusicFallback" style="display:none; margin-top:0.75rem; padding-top:0.75rem; border-top:1px solid #f0ede8;">
+    <p style="font-family:'DM Sans',sans-serif; font-size:0.78rem; color:#a0a0b0; margin:0 0 0.5rem;">No songs uploaded yet — using built-in music:</p>
+    <div class="music-options" style="display:flex; gap:0.5rem; flex-wrap:wrap;">
+      <button class="music-option active" data-music="calm" onclick="selectBuiltinMusic(this)">🎹 Calm</button>
+      <button class="music-option" data-music="dramatic" onclick="selectBuiltinMusic(this)">🎻 Dramatic</button>
+      <button class="music-option" data-music="upbeat" onclick="selectBuiltinMusic(this)">🎸 Upbeat</button>
+    </div>
+  </div>
+</div>
+
+<!-- Products Grid -->
+<div class="products-selection-grid">
+  {% for product in products %}
+  <div class="selectable-card"
+       data-sku="{{ product.SKU }}"
+       data-title="{{ product.Title }}"
+       data-price="{{ product.Price|default('0.00') }}"
+       data-category="{{ product.Category|default('') }}"
+       data-condition="{{ product.Condition|default('') }}"
+       data-description="{{ product.Description|default('')|truncate(150) }}"
+       data-images='{{ product.valid_images | tojson }}'
+       data-image="{% if product.valid_images %}{{ url_for('serve_upload', filename=product.valid_images[0]) }}{% endif %}"
+       onclick="toggleCard(this)">
+    <div class="select-checkbox" id="chk-{{ loop.index }}">✓</div>
+
+    <!-- Image scroller -->
+    <div class="card-img" style="position:relative;">
+      {% if product.valid_images and product.valid_images|length > 0 %}
+        <img class="card-main-img"
+             src="{{ url_for('serve_upload', filename=product.valid_images[0]) }}"
+             alt="{{ product.Title }}"
+             data-idx="0">
+        {% if product.valid_images|length > 1 %}
+          <button class="img-nav img-nav-prev" onclick="event.stopPropagation(); scrollImg(this, -1)" title="Previous photo">&#8249;</button>
+          <button class="img-nav img-nav-next" onclick="event.stopPropagation(); scrollImg(this,  1)" title="Next photo">&#8250;</button>
+          <div class="img-counter">1 / {{ product.valid_images|length }}</div>
+          <div class="img-dots">
+            {% for img in product.valid_images %}
+            <span class="img-dot {% if loop.first %}active{% endif %}"></span>
+            {% endfor %}
+          </div>
+        {% endif %}
+      {% else %}
+        <span class="no-img-text">No Image</span>
+      {% endif %}
+    </div>
+    <div class="card-body">
+      <div class="card-title">{{ product.Title }}</div>
+      <div class="card-sku">SKU: {{ product.SKU }}</div>
+      <div class="card-footer-row">
+        <span class="card-price">${{ product.Price|default('0.00') }}</span>
+        <span class="card-status status-{{ product.Status|lower|default('available') }}">{{ product.Status }}</span>
+      </div>
+      <button class="btn-video" onclick="event.stopPropagation(); makeVideo('{{ product.SKU }}', this)" title="Generate a 12-second animated MP4 video ad">
+        🎬 Make Video Ad
+      </button>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+{% if not products %}
+<div style="text-align:center; padding: 3rem; background: white; border-radius: 12px; color: #7a7a8c; font-family: 'DM Sans', sans-serif;">
+  No products in inventory yet. <a href="{{ url_for('new_product') }}" style="color: #1a1a2e; font-weight: 600;">Add some products first!</a>
+</div>
+{% endif %}
+
+<!-- Sticky Generate Bar -->
+<div class="generate-bar">
+  <div class="generate-bar-info">
+    <strong id="barCount">0</strong> products selected &mdash; choose up to 10
+  </div>
+  <button class="btn-generate" id="generateBtn" disabled onclick="generateAds()">
+    <span class="gold-icon">✦</span> Generate JPEG Ads
+  </button>
+  <a href="/ad-gallery" class="btn-vault">
+    🏛 View Ad Vault
+  </a>
+</div>
+
+<!-- Generated Ads Section (shown after generation) -->
+<div class="generated-ads-section" id="generatedSection">
+  <h2>✅ Generated Ads</h2>
+  <p style="color:#7a7a8c; font-family: 'DM Sans', sans-serif; margin-bottom: 1rem;">
+    Your ads have been saved to the <code>ads/</code> folder as high-quality JPEG files. View or download each one below.
+  </p>
+  <div class="vault-toast visible" id="vaultToast">
+    <span class="vault-toast-text">🎉 Ads saved! Head to your <strong>Ad Vault</strong> to browse, download &amp; manage all your creations.</span>
+    <a href="/ad-gallery" class="vault-toast-btn">🏛 Open Ad Vault →</a>
+  </div>
+  <div class="ad-files-list" id="adFilesList"></div>
+</div>
+
+<!-- Video Ads Section -->
+<div class="video-result-section" id="videoSection">
+  <h2>🎬 Video Ads</h2>
+  <p style="color:#7a7a8c; font-family:'DM Sans',sans-serif; margin-bottom:1rem;">
+    12-second animated MP4 ads ready to post on Facebook &amp; Instagram.
+  </p>
+  <div class="vault-toast visible" id="videoVaultToast" style="display:none;">
+    <span class="vault-toast-text">🎬 Video saved! Find it in your <strong>Ad Vault</strong> anytime.</span>
+    <a href="/ad-gallery" class="vault-toast-btn">🏛 Open Ad Vault →</a>
+  </div>
+  <div class="video-cards-list" id="videoCardsList"></div>
+</div>
+
+<!-- Loading Overlay (JPEG ads) -->
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="spinner-ring"></div>
+  <div>Generating your ads...</div>
+</div>
+
+<!-- Video Progress Monitor -->
+<div id="videoProgressOverlay" style="display:none; position:fixed; inset:0; background:rgba(10,10,30,0.82); z-index:9999; align-items:center; justify-content:center;">
+  <div style="background:#1a1a2e; border-radius:20px; padding:2.5rem 2.75rem; max-width:420px; width:92%; text-align:center; box-shadow:0 24px 64px rgba(0,0,0,0.6); border:1px solid rgba(240,192,64,0.25);">
+
+    <!-- Icon + title -->
+    <div style="font-size:2.8rem; margin-bottom:0.5rem;">🎬</div>
+    <h3 style="font-family:'Playfair Display',serif; color:#f0c040; margin:0 0 0.25rem; font-size:1.4rem;">Creating Your Video Ad</h3>
+    <p id="vpTitle" style="color:#9090b0; font-family:'DM Sans',sans-serif; font-size:0.85rem; margin:0 0 1.75rem;"></p>
+
+    <!-- Progress bar -->
+    <div style="background:rgba(255,255,255,0.1); border-radius:999px; height:10px; overflow:hidden; margin-bottom:0.6rem;">
+      <div id="vpBar" style="height:100%; width:0%; background:linear-gradient(90deg,#e74c3c,#f0c040); border-radius:999px; transition:width 0.8s ease;"></div>
+    </div>
+
+    <!-- Elapsed + estimated -->
+    <div style="display:flex; justify-content:space-between; font-family:'DM Sans',sans-serif; font-size:0.8rem; color:#7070a0; margin-bottom:1.5rem;">
+      <span>⏱ <span id="vpElapsed">0s</span> elapsed</span>
+      <span id="vpEst">Estimating…</span>
+    </div>
+
+    <!-- Step messages -->
+    <div id="vpStep" style="background:rgba(255,255,255,0.06); border-radius:10px; padding:0.75rem 1rem; font-family:'DM Sans',sans-serif; font-size:0.9rem; color:#d0d0e8; min-height:2.5rem;">
+      Starting up…
+    </div>
+
+    <!-- Step dots -->
+    <div style="display:flex; justify-content:center; gap:0.6rem; margin-top:1.25rem;">
+      <div class="vp-dot" id="vpDot1"><div class="vp-dot-inner"></div><span>Frames</span></div>
+      <div class="vp-dot" id="vpDot2"><div class="vp-dot-inner"></div><span>Music</span></div>
+      <div class="vp-dot" id="vpDot3"><div class="vp-dot-inner"></div><span>Encoding</span></div>
+      <div class="vp-dot" id="vpDot4"><div class="vp-dot-inner"></div><span>Finishing</span></div>
+    </div>
+  </div>
+</div>
+
+<style>
+.vp-dot { display:flex; flex-direction:column; align-items:center; gap:0.3rem; font-family:'DM Sans',sans-serif; font-size:0.7rem; color:#505070; transition:color 0.3s; }
+.vp-dot-inner { width:12px; height:12px; border-radius:50%; background:#303050; transition:background 0.3s, transform 0.3s; }
+.vp-dot.active { color:#f0c040; }
+.vp-dot.active .vp-dot-inner { background:#f0c040; transform:scale(1.4); }
+.vp-dot.done { color:#27ae60; }
+.vp-dot.done .vp-dot-inner { background:#27ae60; }
+</style>
+
+<script>
+let selectedSkus = new Set();
+let selectedStyle = 'elegant';
+let selectedMusic = 'calm';      // built-in fallback mood
+let selectedMusicFile = '';      // library filename, empty = use built-in
+
+function selectStyle(btn) {
+  document.querySelectorAll('.style-option').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  selectedStyle = btn.dataset.style;
+}
+
+function selectBuiltinMusic(btn) {
+  document.querySelectorAll('.music-option').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  selectedMusic     = btn.dataset.music;
+  selectedMusicFile = '';
+}
+
+// ── Music Library ──────────────────────────────────────────────────────────
+function loadMusicLibrary() {
+  fetch('/music/list')
+    .then(r => r.json())
+    .then(data => {
+      const grid    = document.getElementById('musicLibGrid');
+      const empty   = document.getElementById('musicLibEmpty');
+      const fallback= document.getElementById('builtinMusicFallback');
+      grid.innerHTML = '';
+
+      if (!data.files || data.files.length === 0) {
+        empty.style.display = 'block';
+        empty.textContent   = 'No songs in library yet. Upload an MP3, WAV, M4A or AAC file above.';
+        fallback.style.display = 'block';
+        return;
+      }
+
+      empty.style.display   = 'none';
+      fallback.style.display = 'none';
+      const isAdmin = {% if session.get('username') == 'admin' %}true{% else %}false{% endif %};
+
+      data.files.forEach(f => {
+        const card = document.createElement('div');
+        card.className = 'music-track-card';
+        card.dataset.filename = f.filename;
+        card.innerHTML = '<div class="music-track-info">'
+          + '<div class="music-track-name">🎵 ' + f.name + '</div>'
+          + '<div class="music-track-meta">' + f.ext + ' · ' + f.size_kb + ' KB</div>'
+          + '</div>'
+          + (isAdmin ? '<button class="btn-delete-music" onclick="deleteMusic(this.closest(\'.music-track-card\').dataset.filename, event)" title="Remove from library">🗑</button>' : '');
+        card.addEventListener('click', () => selectTrack(card, f));
+        grid.appendChild(card);
+      });
+
+      // Auto-select first track
+      const first = grid.querySelector('.music-track-card');
+      if (first) selectTrack(first, data.files[0]);
+    })
+    .catch(() => {
+      document.getElementById('musicLibEmpty').textContent = 'Could not load music library.';
+      document.getElementById('builtinMusicFallback').style.display = 'block';
+    });
+}
+
+function selectTrack(card, f) {
+  document.querySelectorAll('.music-track-card').forEach(c => c.classList.remove('selected'));
+  card.classList.add('selected');
+  selectedMusicFile = f.filename;
+  selectedMusic     = '';
+  document.getElementById('selectedMusicName').textContent = '▶ ' + f.name;
+}
+
+function uploadMusic(input) {
+  const file = input.files[0];
+  if (!file) return;
+
+  const status      = document.getElementById('uploadStatus');
+  const progressWrap= document.getElementById('uploadProgressWrap');
+  const bar         = document.getElementById('uploadBar');
+  const pct         = document.getElementById('uploadPct');
+  const speedEl     = document.getElementById('uploadSpeed');
+  const fileNameEl  = document.getElementById('uploadFileName');
+  const label       = document.getElementById('uploadLabel');
+
+  // Validate size (20 MB max)
+  if (file.size > 20 * 1024 * 1024) {
+    alert('File is too large. Please use a file under 20 MB.');
+    input.value = '';
+    return;
+  }
+
+  // Show progress UI
+  status.style.display       = 'none';
+  progressWrap.style.display = 'block';
+  label.style.opacity        = '0.5';
+  label.style.pointerEvents  = 'none';
+  fileNameEl.textContent     = file.name;
+  bar.style.width            = '0%';
+  pct.textContent            = '0%';
+  speedEl.textContent        = 'Starting upload…';
+
+  const startTime = Date.now();
+  const fd = new FormData();
+  fd.append('music_file', file);
+
+  const xhr = new XMLHttpRequest();
+
+  xhr.upload.addEventListener('progress', e => {
+    if (!e.lengthComputable) return;
+    const percent   = Math.round((e.loaded / e.total) * 100);
+    const elapsed   = (Date.now() - startTime) / 1000;
+    const kbps      = elapsed > 0 ? Math.round((e.loaded / 1024) / elapsed) : 0;
+    const remaining = kbps > 0 ? Math.round(((e.total - e.loaded) / 1024) / kbps) : '…';
+
+    bar.style.width   = percent + '%';
+    pct.textContent   = percent + '%';
+    speedEl.textContent = `${kbps} KB/s · ${remaining}s remaining · ${Math.round(e.loaded/1024)} / ${Math.round(e.total/1024)} KB`;
+  });
+
+  xhr.addEventListener('load', () => {
+    input.value            = '';
+    label.style.opacity    = '1';
+    label.style.pointerEvents = 'auto';
+
+    try {
+      const data = JSON.parse(xhr.responseText);
+      progressWrap.style.display = 'none';
+      bar.style.width = '0%';
+      if (data.success) {
+        status.style.display = 'inline';
+        status.style.color   = '#27ae60';
+        status.textContent   = '✅ "' + data.name + '" added!';
+        setTimeout(() => status.style.display = 'none', 4000);
+        loadMusicLibrary();
+      } else {
+        status.style.display = 'inline';
+        status.style.color   = '#e74c3c';
+        status.textContent   = '❌ ' + (data.error || 'Upload failed');
+        setTimeout(() => status.style.display = 'none', 5000);
+      }
+    } catch(e) {
+      progressWrap.style.display = 'none';
+      alert('Upload error: unexpected response from server.');
+    }
+  });
+
+  xhr.addEventListener('error', () => {
+    input.value = '';
+    progressWrap.style.display = 'none';
+    label.style.opacity       = '1';
+    label.style.pointerEvents = 'auto';
+    alert('Upload failed — check your connection and try again.');
+  });
+
+  xhr.open('POST', '/music/upload');
+  xhr.send(fd);
+}
+
+function deleteMusic(filename, event) {
+  event.stopPropagation();
+  if (!confirm('Remove "' + filename + '" from your music library?')) return;
+  fetch('/music/delete/' + encodeURIComponent(filename), { method:'POST' })
+    .then(r => r.json())
+    .then(() => {
+      if (selectedMusicFile === filename) {
+        selectedMusicFile = '';
+        document.getElementById('selectedMusicName').textContent = '';
+      }
+      loadMusicLibrary();
+    });
+}
+
+// Load library on page ready
+document.addEventListener('DOMContentLoaded', loadMusicLibrary);
+
+function scrollImg(btn, dir) {
+  const card     = btn.closest('.selectable-card');
+  const imgEl    = card.querySelector('.card-main-img');
+  const dots     = card.querySelectorAll('.img-dot');
+  const counter  = card.querySelector('.img-counter');
+  const images   = JSON.parse(card.dataset.images || '[]');
+  if (images.length < 2) return;
+
+  let idx = parseInt(imgEl.dataset.idx || '0');
+  idx = (idx + dir + images.length) % images.length;
+  imgEl.dataset.idx = idx;
+
+  // Build URL from filename
+  const base = imgEl.src.substring(0, imgEl.src.lastIndexOf('/') + 1);
+  imgEl.src  = base + images[idx];
+
+  // Update card's data-image so JPEG ads also use the right one
+  card.dataset.image = base + images[idx];
+
+  // Update dots
+  dots.forEach((d, i) => d.classList.toggle('active', i === idx));
+
+  // Update counter badge
+  if (counter) counter.textContent = (idx + 1) + ' / ' + images.length;
+}
+
+function getSelectedImageFile(card) {
+  const imgEl  = card.querySelector('.card-main-img');
+  const images = JSON.parse(card.dataset.images || '[]');
+  const idx    = parseInt(imgEl ? imgEl.dataset.idx || '0' : '0');
+  return images[idx] || (images[0] || '');
+}
+
+function toggleCard(card) {
+  const sku = card.dataset.sku;
+  if (selectedSkus.has(sku)) {
+    selectedSkus.delete(sku);
+    card.classList.remove('selected');
+  } else {
+    if (selectedSkus.size >= 10) {
+      document.getElementById('maxWarning').classList.add('visible');
+      return;
+    }
+    document.getElementById('maxWarning').classList.remove('visible');
+    selectedSkus.add(sku);
+    card.classList.add('selected');
+  }
+  updateUI();
+}
+
+function updateUI() {
+  const count = selectedSkus.size;
+  document.getElementById('countDisplay').textContent = count;
+  document.getElementById('barCount').textContent = count;
+  document.getElementById('generateBtn').disabled = count === 0;
+}
+
+function generateAds() {
+  if (selectedSkus.size === 0) return;
+
+  // Gather selected product data
+  const products = [];
+  document.querySelectorAll('.selectable-card.selected').forEach(card => {
+    products.push({
+      sku:        card.dataset.sku,
+      title:      card.dataset.title,
+      price:      card.dataset.price,
+      category:   card.dataset.category,
+      condition:  card.dataset.condition,
+      description:card.dataset.description,
+      image:      card.dataset.image,
+      image_file: getSelectedImageFile(card)
+    });
+  });
+
+  document.getElementById('loadingOverlay').classList.add('active');
+
+  fetch('/generate-ads', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ products: products, style: selectedStyle })
+  })
+  .then(r => r.json())
+  .then(data => {
+    document.getElementById('loadingOverlay').classList.remove('active');
+    if (data.success) {
+      showGeneratedAds(data.files);
+    } else {
+      alert('Error generating ads: ' + (data.error || 'Unknown error'));
+    }
+  })
+  .catch(e => {
+    document.getElementById('loadingOverlay').classList.remove('active');
+    alert('Error: ' + e);
+  });
+}
+
+function makeVideo(sku, btn) {
+  const style     = document.querySelector('.style-option.active')?.dataset.style || 'elegant';
+  const card      = btn.closest('.selectable-card');
+  const titleText = card?.dataset.title || sku;
+  const imageFile = getSelectedImageFile(card);
+
+  // ── Progress monitor setup ──────────────────────────────────────
+  const overlay  = document.getElementById('videoProgressOverlay');
+  const bar      = document.getElementById('vpBar');
+  const stepEl   = document.getElementById('vpStep');
+  const elapsedEl= document.getElementById('vpElapsed');
+  const estEl    = document.getElementById('vpEst');
+  const titleEl  = document.getElementById('vpTitle');
+  const dots     = ['vpDot1','vpDot2','vpDot3','vpDot4'].map(id => document.getElementById(id));
+
+  const steps = [
+    { pct:8,  msg:'🖼️ Loading product image & applying EXIF rotation…', dot:0, t:2  },
+    { pct:18, msg:'🤖 Asking Claude AI for a punchy headline…',          dot:0, t:5  },
+    { pct:32, msg:'🎬 Rendering animation frames (this takes a moment)…',dot:0, t:9  },
+    { pct:55, msg:'🎬 Still rendering frames — almost halfway…',         dot:0, t:16 },
+    { pct:68, msg:'🎵 Generating background music…',                     dot:1, t:20 },
+    { pct:78, msg:'⚙️ Encoding video with ffmpeg…',                      dot:2, t:24 },
+    { pct:88, msg:'⚙️ Compressing & finalising MP4…',                    dot:2, t:28 },
+    { pct:94, msg:'✅ Almost done — wrapping up…',                       dot:3, t:32 },
+  ];
+
+  function setDot(idx) {
+    dots.forEach((d, i) => {
+      d.classList.remove('active','done');
+      if (i < idx) d.classList.add('done');
+    });
+    if (idx < dots.length) dots[idx].classList.add('active');
+  }
+
+  titleEl.textContent = titleText;
+  bar.style.width = '0%';
+  bar.style.transition = 'none';
+  stepEl.textContent = 'Starting up…';
+  elapsedEl.textContent = '0s';
+  estEl.textContent = 'Estimating…';
+  dots.forEach(d => d.classList.remove('active','done'));
+  overlay.style.display = 'flex';
+
+  // Elapsed timer
+  const startTime = Date.now();
+  const elapsedTimer = setInterval(() => {
+    const s = Math.floor((Date.now() - startTime) / 1000);
+    elapsedEl.textContent = s + 's';
+    // Rough estimate based on typical 35s generation time
+    const remaining = Math.max(0, 35 - s);
+    estEl.textContent = remaining > 0 ? `~${remaining}s remaining` : 'Almost done…';
+  }, 1000);
+
+  // Step scheduler
+  const stepTimers = steps.map(s => setTimeout(() => {
+    bar.style.transition = 'width 1.5s ease';
+    bar.style.width = s.pct + '%';
+    stepEl.textContent = s.msg;
+    setDot(s.dot);
+  }, s.t * 1000));
+
+  btn.disabled = true;
+  btn.innerHTML = '⏳ Generating…';
+
+  fetch('/generate-video-ad', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ sku: sku, style: style, music: selectedMusic, music_file: selectedMusicFile, image_file: imageFile })
+  })
+  .then(r => r.json())
+  .then(data => {
+    // Clear all timers
+    clearInterval(elapsedTimer);
+    stepTimers.forEach(clearTimeout);
+
+    // Complete the bar
+    bar.style.transition = 'width 0.5s ease';
+    bar.style.width = '100%';
+    stepEl.textContent = '🎉 Video ready!';
+    setDot(4);
+    dots.forEach(d => d.classList.add('done'));
+
+    setTimeout(() => {
+      overlay.style.display = 'none';
+      btn.disabled = false;
+      if (data.success) {
+        btn.innerHTML = '✅ Done!';
+        btn.style.background = 'linear-gradient(135deg,#27ae60,#1e8449)';
+        showVideoAd(data);
+      } else {
+        btn.innerHTML = '🎬 Make Video Ad';
+        btn.style.background = '';
+        alert('Video error: ' + (data.error || 'Unknown error'));
+      }
+    }, 800);
+  })
+  .catch(e => {
+    clearInterval(elapsedTimer);
+    stepTimers.forEach(clearTimeout);
+    overlay.style.display = 'none';
+    btn.disabled = false;
+    btn.innerHTML = '🎬 Make Video Ad';
+    alert('Error: ' + e);
+  });
+}
+
+function showVideoAd(data) {
+  const section  = document.getElementById('videoSection');
+  const list     = document.getElementById('videoCardsList');
+  // Show vault toast
+  const vt = document.getElementById('videoVaultToast');
+  if (vt) vt.style.display = 'flex';
+  const card     = document.createElement('div');
+  const url      = '/ads/' + data.filename;
+  const download = '/download-ad/' + data.filename;
+  const title    = data.product_title || data.title || '';
+  card.className = 'video-card';
+  card.innerHTML = `
+    <video controls autoplay muted loop>
+      <source src="${url}" type="video/mp4">
+    </video>
+    <div class="video-card-footer">
+      <div class="video-card-title">${title}</div>
+      <div style="display:flex;gap:0.5rem;flex-shrink:0;">
+        <a href="${url}" target="_blank" class="btn-view-ad">🔗 Open</a>
+        <a href="${download}" class="btn-download-ad">⬇️ Download</a>
+      </div>
+    </div>
+  `;
+  list.prepend(card);
+  section.classList.add('visible');
+  section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function showGeneratedAds(files) {
+  const section = document.getElementById('generatedSection');
+  const list = document.getElementById('adFilesList');
+  list.innerHTML = '';
+
+  files.forEach(f => {
+    const card = document.createElement('div');
+    card.className = 'ad-file-card';
+    card.style.flexDirection = 'column';
+    card.style.alignItems = 'stretch';
+    card.innerHTML = `
+      <div style="display:flex; align-items:center; justify-content:space-between; gap:1rem; padding-bottom:0.75rem;">
+        <div class="ad-file-info">
+          <div class="ad-file-name">${f.product_title}</div>
+        </div>
+        <div class="ad-file-actions">
+          <a href="/ads/${f.filename}" target="_blank" class="btn-view-ad">🔗 Open Ad</a>
+          <a href="/download-ad/${f.filename}" class="btn-download-ad">⬇️ Download</a>
+        </div>
+      </div>
+      <iframe src="/ads/${f.filename}" style="width:100%; height:520px; border:none; border-radius:8px; box-shadow:0 6px 18px rgba(0,0,0,0.15);" title="${f.product_title}"></iframe>
+    `;
+    list.appendChild(card);
+  });
+
+  section.classList.add('visible');
+  section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+</script>
+{% endblock %}

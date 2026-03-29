@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+{% block content %}
+<div style="max-width:540px; margin:3rem auto;">
+  <div style="background:white; border-radius:14px; padding:2.5rem; box-shadow:0 4px 20px rgba(0,0,0,0.09);">
+
+    <h2 style="font-family:'Playfair Display',serif; font-size:1.6rem; margin:0 0 0.5rem; color:#1a1a2e;">
+      📥 Import from Square
+    </h2>
+    <p style="font-family:'DM Sans',sans-serif; color:#7a7a8c; margin:0 0 2rem; font-size:0.95rem;">
+      Upload a <strong>Square Item Export CSV</strong> to add products to your inventory.
+      Duplicate SKUs will be skipped automatically.
+    </p>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% for cat, msg in messages %}
+        <div style="padding:0.75rem 1rem; border-radius:8px; margin-bottom:1rem; font-family:'DM Sans',sans-serif;
+          background:{{'#d4edda' if cat=='success' else '#f8d7da'}};
+          color:{{'#155724' if cat=='success' else '#721c24'}};">
+          {{ msg }}
+        </div>
+      {% endfor %}
+    {% endwith %}
+
+    <form method="POST" enctype="multipart/form-data">
+      <label style="display:block; font-family:'DM Sans',sans-serif; font-weight:600; color:#1a1a2e; margin-bottom:0.5rem;">
+        Select Square CSV File
+      </label>
+      <input type="file" name="square_file" accept=".csv" required
+        style="display:block; width:100%; padding:0.6rem; border:2px solid #e0ddd8; border-radius:8px;
+               font-family:'DM Sans',sans-serif; font-size:0.9rem; margin-bottom:1.5rem; box-sizing:border-box;">
+
+      <div style="display:flex; gap:0.75rem; flex-wrap:wrap;">
+        <button type="submit" class="btn btn-primary" style="background:#2e7d6e; border-color:#2e7d6e;">
+          📥 Import Items
+        </button>
+        <a href="{{ url_for('dashboard') }}" class="btn btn-secondary">Cancel</a>
+      </div>
+    </form>
+
+    <div style="margin-top:2rem; padding-top:1.5rem; border-top:1px solid #f0ede8;">
+      <p style="font-family:'DM Sans',sans-serif; font-size:0.8rem; color:#a0a0b0; margin:0 0 0.4rem;">
+        <strong>How to export from Square:</strong>
+      </p>
+      <ol style="font-family:'DM Sans',sans-serif; font-size:0.8rem; color:#7a7a8c; margin:0; padding-left:1.2rem; line-height:1.8;">
+        <li>Go to Square Dashboard → Items → Item Library</li>
+        <li>Click <strong>Export</strong> in the top right</li>
+        <li>Select <strong>Export Items</strong> and download the CSV</li>
+        <li>Upload that file here</li>
+      </ol>
+    </div>
+
+  </div>
+</div>
+{% endblock %}

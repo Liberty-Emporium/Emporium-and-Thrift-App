@@ -1,0 +1,16 @@
+.env
+env.txt
+__pycache__/
+*.pyc
+*.pyo
+uploads/
+backups/
+ads/
+music/
+*.csv
+!inventory_sample.csv
+users.json
+pending_users.json
+.DS_Store
+venv/
+.venv/
