@@ -1760,6 +1760,40 @@ def manual_backup():
     flash('Manual backup created!', 'success')
     return redirect(url_for('admin_backups'))
 
+@app.route('/admin/fix-images', methods=['POST'])
+@login_required
+@admin_required
+def fix_images():
+    try:
+        from PIL import Image, ExifTags
+        import io
+    except ImportError:
+        flash('Pillow library not available — cannot fix images.', 'error')
+        return redirect(url_for('admin_backups'))
+
+    orient_key = next((k for k, v in ExifTags.TAGS.items() if v == 'Orientation'), None)
+    fixed = 0
+    skipped = 0
+    for fname in os.listdir(UPLOAD_FOLDER):
+        if not fname.lower().endswith(('.jpg', '.jpeg', '.png', '.gif', '.webp')):
+            continue
+        fpath = os.path.join(UPLOAD_FOLDER, fname)
+        try:
+            img = Image.open(fpath)
+            exif = img._getexif() if hasattr(img, '_getexif') else None
+            rot = None
+            if exif and orient_key and orient_key in exif:
+                rot = {3: 180, 6: 270, 8: 90}.get(exif[orient_key])
+            if rot:
+                img = img.rotate(rot, expand=True)
+                img.save(fpath)
+                fixed += 1
+        except Exception:
+            skipped += 1
+
+    flash(f'Done! Rotated {fixed} image(s). Skipped {skipped} (unreadable).', 'success')
+    return redirect(url_for('admin_backups'))
+
 # ── Debug ─────────────────────────────────────────────────────────────────────
 @app.route('/debug')
 @login_required
