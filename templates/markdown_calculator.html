@@ -38,7 +38,7 @@
                 <td>${{ "%.2f"|format(p.profit) }}</td>
                 <td>
                     <form action="{{ url_for('edit_product', sku=p.sku) }}" method="GET">
-                        <button type="submit" class="btn btn-small">Apply</button>
+                        <button type="submit" class="btn btn-small" style="background:#8B0000;border-radius:25px;">Apply</button>
                     </form>
                 </td>
             </tr>

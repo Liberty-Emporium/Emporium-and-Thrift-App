@@ -9,7 +9,7 @@
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem;">
         <h1 style="color:#2e7d6e;">💾 Inventory Backups</h1>
         <form method="POST" action="{{ url_for('manual_backup') }}">
-            <button type="submit" class="btn btn-primary">📦 Create Backup Now</button>
+            <button type="submit" class="btn btn-primary" style="background:#8B0000;border-radius:25px;padding:0.6rem 1.5rem;">📦 Create Backup Now</button>
         </form>
     </div>
 
@@ -29,7 +29,7 @@
                     <span style="color:#6b9e95; font-size:0.85rem;">{{ b.modified }} &nbsp;·&nbsp; {{ (b.size / 1024)|round(1) }} KB</span>
                 </div>
                 <div style="display:flex; gap:0.5rem;">
-                    <a href="{{ url_for('download_backup', filename=b.filename) }}" class="btn btn-secondary btn-small">⬇️ Download</a>
+                    <a href="{{ url_for('download_backup', filename=b.filename) }}" class="btn btn-secondary btn-small" style="background:#8B0000;border-radius:25px;color:#fff !important;">⬇️ Download</a>
                     <form method="POST" action="{{ url_for('restore_backup', filename=b.filename) }}"
                           onsubmit="return confirm('Restore inventory from this backup? Current inventory will be overwritten.')">
                         <button type="submit" class="btn btn-primary btn-small">♻️ Restore</button>
@@ -48,7 +48,7 @@
         </p>
         <form method="POST" action="{{ url_for('fix_images') }}"
               onsubmit="return confirm('This will scan and rotate all sideways photos in your uploads folder. Continue?')">
-            <button type="submit" class="btn btn-primary" style="background:#e74c3c; border-color:#c0392b;">
+            <button type="submit" class="btn btn-primary" style="background:#8B0000;border-radius:25px;padding:0.6rem 1.5rem;" style="background:#e74c3c; border-color:#c0392b;">
                 🔄 Fix All Sideways Images Now
             </button>
         </form>

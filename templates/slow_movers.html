@@ -29,7 +29,7 @@
                 <td>${{ "%.2f"|format(p.price) }}</td>
                 <td><span class="days {% if p.days_old > 90 %}urgent{% endif %}">{{ p.days_old }} days</span></td>
                 <td>
-                    <a href="{{ url_for('edit_product', sku=p.sku) }}" class="btn btn-small">Edit</a>
+                    <a href="{{ url_for('edit_product', sku=p.sku) }}" class="btn btn-small" style="background:#8B0000;border-radius:25px;">Edit</a>
                 </td>
             </tr>
             {% endfor %}

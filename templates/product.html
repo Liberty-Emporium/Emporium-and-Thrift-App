@@ -115,7 +115,7 @@
 
             <div class="product-actions" style="margin-top:1.5rem;">
                 {% if not session.get('is_guest') %}
-                <a href="{{ url_for('edit_product', sku=product.SKU) }}" class="btn btn-primary">Edit Product</a>
+                <a href="{{ url_for('edit_product', sku=product.SKU) }}" class="btn btn-primary" style="background:#8B0000;border-radius:25px;padding:0.6rem 1.5rem;">Edit Product</a>
                 <a href="{{ url_for('edit_image', sku=product.SKU) }}" class="btn btn-secondary">Edit Images</a>
                 <a href="{{ url_for('price_tag', sku=product.SKU) }}" class="btn btn-secondary">🏷️ Print Tag</a>
                 <form method="POST" action="{{ url_for('delete_product', sku=product.SKU) }}" class="delete-form" style="display: inline;">
