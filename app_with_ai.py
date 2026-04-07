@@ -2251,3 +2251,38 @@ def inject_globals():
 
 if __name__ == '__main__':
     app.run(debug=True)
+
+@app.route('/settings', methods=['GET','POST'])
+@login_required
+@admin_required
+def admin_settings():
+    api_key = os.environ.get('OPENROUTER_API_KEY', '')
+    anthropic_key = os.environ.get('ANTHROPIC_API_KEY', '')
+    
+    if request.method == 'POST':
+        action = request.form.get('action')
+        if action == 'update_api_key':
+            key = request.form.get('api_key', '').strip()
+            if key:
+                # Update env file or show instructions
+                flash(f'API Key would be set. Currently stored in Railway vars. Go to Railway Dashboard → Variables to update.', 'info')
+        elif action == 'generate_api':
+            import secrets
+            new_key = secrets.token_urlsafe(32)
+            # Save to file
+            api_keys_file = os.path.join(DATA_DIR, 'api_keys.json')
+            keys = {}
+            if os.path.exists(api_keys_file):
+                import json
+                keys = json.load(open(api_keys_file))
+            keys[new_key] = {'name': 'Echo API', 'created': str(datetime.datetime.now())}
+            with open(api_keys_file, 'w') as f:
+                json.dump(keys, f, indent=2)
+            flash(f'Generated API Key: {new_key}', 'success')
+        return redirect(url_for('admin_settings'))
+    
+    return render_template('settings.html', 
+                         api_key=api_key[:10]+'...' if api_key else 'Not set',
+                         has_anthropic=bool(anthropic_key),
+                         **ctx())
+

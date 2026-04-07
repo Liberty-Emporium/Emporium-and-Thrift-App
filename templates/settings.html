@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+
+{% block title %}Settings | {{ store_name }}{% endblock %}
+
+{% block content %}
+<div class="settings-page" style="max-width:800px;margin:0 auto;padding:2rem;">
+    <h1>⚙️ Settings</h1>
+    
+    <div class="settings-section">
+        <h2>🔑 API Keys</h2>
+        
+        <div class="card">
+            <h3>OpenRouter API Key (AI Features)</h3>
+            <p class="muted">Current: {{ api_key }}</p>
+            <form method="POST">
+                <input type="hidden" name="action" value="update_api_key">
+                <input type="text" name="api_key" placeholder="sk-..." style="width:100%;padding:0.5rem;margin:0.5rem 0;">
+                <button type="submit" class="btn btn-primary">Update API Key</button>
+            </form>
+            <p class="hint">Get your key from <a href="https://openrouter.ai" target="_blank">openrouter.ai</a></p>
+        </div>
+        
+        <div class="card">
+            <h3>🤖 Anthropic API Key</h3>
+            {% if has_anthropic %}
+            <p class="success">✅ Configured</p>
+            {% else %}
+            <p class="warning">⚠️ Not set</p>
+            {% endif %}
+        </div>
+        
+        <div class="card">
+            <h3>🔐 App API Key (For Echo)</h3>
+            <p>Generate an API key for Echo to manage your app:</p>
+            <form method="POST">
+                <input type="hidden" name="action" value="generate_api">
+                <button type="submit" class="btn btn-primary">Generate New API Key</button>
+            </form>
+            {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+            <div class="flash-messages">
+                {% for category, message in messages %}
+                <div class="flash {{ category }}">{{ message }}</div>
+                {% endfor %}
+            </div>
+            {% endif %}
+            {% endwith %}
+        </div>
+    </div>
+    
+    <div class="settings-section">
+        <h2>📦 Data</h2>
+        <a href="{{ url_for('export_csv') }}" class="btn">Export CSV</a>
+        <a href="{{ url_for('import_csv') }}" class="btn">Import CSV</a>
+    </div>
+</div>
+
+<style>
+.settings-page h1 { margin-bottom: 2rem; }
+.settings-section { margin-bottom: 2rem; }
+.settings-section h2 { border-bottom: 2px solid #D4A017; padding-bottom: 0.5rem; margin-bottom: 1rem; }
+.card { background: #f8f8f8; padding: 1.5rem; border-radius: 8px; margin-bottom: 1rem; }
+.card h3 { margin: 0 0 0.5rem; }
+.muted { color: #666; }
+.warning { color: #856404; background: #fff3cd; padding: 0.5rem; border-radius: 4px; }
+.success { color: #155724; background: #d4edda; padding: 0.5rem; border-radius: 4px; }
+.hint { font-size: 0.85rem; color: #666; margin-top: 0.5rem; }
+.flash-messages { margin-top: 1rem; }
+.flash { padding: 1rem; border-radius: 4px; margin-bottom: 0.5rem; }
+.flash.success { background: #d4edda; }
+.flash.info { background: #d1ecf1; }
+</style>
+{% endblock %}
