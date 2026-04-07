@@ -41,6 +41,27 @@
         .hamburger.open span:nth-child(1) { transform: translateY(8px) rotate(45deg); }
         .hamburger.open span:nth-child(2) { opacity: 0; }
         .hamburger.open span:nth-child(3) { transform: translateY(-8px) rotate(-45deg); }
+        /* Dropdown styles */
+        .dropdown { position: relative; }
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            background: #1a1a2e;
+            min-width: 160px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            border-radius: 6px;
+            z-index: 100;
+            margin-top: 0.5rem;
+        }
+        .dropdown:hover .dropdown-content { display: block; }
+        .dropdown-content a {
+            color: #fff;
+            padding: 0.6rem 1rem;
+            display: block;
+            text-decoration: none;
+        }
+        .dropdown-content a:hover { background: rgba(255,255,255,0.1); }
+        .dropdown > a:after { content: ' ▼'; font-size: 0.7rem; }
     </style>
 
     <header style="position:relative;">
@@ -53,17 +74,28 @@
                 <a href="{{ url_for('dashboard') }}">Dashboard</a>
                 {% if not session.get('is_guest') %}
                 <a href="{{ url_for('new_product') }}">Add Product</a>
-                <a href="{{ url_for('ad_generator') }}">Ad Generator</a>
-                <a href="{{ url_for('ad_gallery') }}">Ad Vault</a>
-                <a href="{{ url_for('listing_generator') }}">Listing Generator</a>
+                
+                <div class="dropdown">
+                    <a href="#">📝 Ads ▽</a>
+                    <div class="dropdown-content">
+                        <a href="{{ url_for('ad_generator') }}">Generator</a>
+                        <a href="{{ url_for('ad_gallery') }}">Vault</a>
+                        <a href="{{ url_for('listing_generator') }}">Listing</a>
+                    </div>
+                </div>
+                
                 {% if session.get('username') == 'admin' %}
-                <a href="{{ url_for('seasonal_sale') }}">Seasonal Sale</a>
-                <a href="{{ url_for('reports') }}">Reports</a>
-                <a href="{{ url_for('markdown_calculator') }}">Markdown</a>
-                <a href="{{ url_for('slow_movers') }}">Slow</a>
-                <a href="{{ url_for('fifo_report') }}">FIFO</a>
-                <a href="{{ url_for('sourcing_tips') }}">Tips</a>
-                <a href="{{ url_for('batch_operations') }}">Batch</a>
+                <div class="dropdown">
+                    <a href="#">📊 Reports ▽</a>
+                    <div class="dropdown-content">
+                        <a href="{{ url_for('reports') }}">Revenue</a>
+                        <a href="{{ url_for('markdown_calculator') }}">Markdown</a>
+                        <a href="{{ url_for('slow_movers') }}">Slow Movers</a>
+                        <a href="{{ url_for('fifo_report') }}">FIFO</a>
+                    </div>
+                </div>
+                <a href="{{ url_for('sourcing_tips') }}">💡 Tips</a>
+                <a href="{{ url_for('batch_operations') }}">📦 Batch</a>
                 {% endif %}
                 {% endif %}
             </div>
