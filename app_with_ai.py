@@ -1794,6 +1794,182 @@ def fix_images():
     flash(f'Done! Rotated {fixed} image(s). Skipped {skipped} (unreadable).', 'success')
     return redirect(url_for('admin_backups'))
 
+# ── Phase 1: AI Pricing & Revenue ─────────────────────────────────────────────
+
+# AI Pricing - Get Claude-suggested price
+@app.route('/ai-price/<sku>', methods=['POST'])
+@login_required
+def ai_price(sku):
+    products = load_inventory()
+    product = next((p for p in products if p['SKU'] == sku), None)
+    if not product:
+        return jsonify({'error': 'Product not found'}), 404
+    
+    # Search for comparable items
+    category = product.get('Category', '')
+    title = product.get('Title', '')
+    condition = product.get('Condition', '')
+    
+    search_query = f"{title} {category} {condition} sold price eBay Poshmark"
+    
+    # Use Claude to suggest price
+    prompt = f"""You are a thrift store pricing expert. A product has these details:
+- Title: {title}
+- Category: {category}
+- Condition: {condition}
+- Description: {product.get('Description', '')[:200]}
+
+Based on similar items sold on eBay, Poshmark, or Facebook Marketplace, suggest:
+1. An optimal listing price (considering platform fees of ~10%)
+2. A markdown discount if item has been unsold
+3. A liquidation price (minimum you'll accept)
+
+Respond in JSON format:
+{{"suggested_price": $XX, "markdown_discount": "X% off if unsold Y days", "liquidation_price": $XX, "reasoning": "brief explanation"}}"""
+
+    try:
+        import requests
+        payload = {
+            'messages': [{'role': 'user', 'content': prompt}],
+            'model': 'claude-haiku-4-5-20251001',
+        }
+        resp = requests.post(
+            'https://openrouter.ai/api/v1/chat/completions',
+            headers={
+                'Authorization': f"Bearer {os.environ.get('OPENROUTER_API_KEY', '')}",
+                'Content-Type': 'application/json',
+            },
+            json=payload,
+            timeout=15
+        )
+        data = resp.json()
+        content = data.get('choices', [{}])[0].get('message', {}).get('content', '{}')
+        # Try to extract JSON from response
+        import re
+        json_match = re.search(r'\{[^}]+\}', content, re.DOTALL)
+        if json_match:
+            result = json.loads(json_match.group())
+        else:
+            result = {'error': 'Could not parse response'}
+    except Exception as e:
+        result = {'error': str(e)}
+    
+    return jsonify(result)
+
+# Markdown Calculator - Auto-suggest discounts
+@app.route('/markdown-calculator')
+@login_required
+def markdown_calculator():
+    products = load_inventory()
+    now = datetime.datetime.now()
+    
+    slow_movers = []
+    for p in products:
+        if p.get('Status') != 'Available':
+            continue
+        date_added = p.get('Date Added', '')
+        if not date_added:
+            continue
+        try:
+            added = datetime.datetime.strptime(date_added, '%Y-%m-%d')
+            days_old = (now - added).days
+            price = float(p.get('Price', 0) or 0)
+            cost = float(p.get('Cost Paid', 0) or 0)
+            
+            # Calculate markdown %
+            if days_old > 30:
+                if days_old > 90:
+                    discount = 40
+                elif days_old > 60:
+                    discount = 25
+                elif days_old > 30:
+                    discount = 15
+                else:
+                    discount = 0
+                
+                if discount > 0:
+                    new_price = round(price * (1 - discount/100), 2)
+                    profit = new_price - cost
+                    slow_movers.append({
+                        'sku': p.get('SKU'),
+                        'title': p.get('Title', '')[:50],
+                        'price': price,
+                        'cost': cost,
+                        'days_old': days_old,
+                        'suggested_discount': f'{discount}%',
+                        'new_price': new_price,
+                        'profit': profit,
+                    })
+        except:
+            continue
+    
+    slow_movers.sort(key=lambda x: x['days_old'], reverse=True)
+    return render_template('markdown_calculator.html', 
+                         products=slow_movers, **ctx())
+
+# Revenue Reports
+@app.route('/reports')
+@login_required
+def reports():
+    products = load_inventory()
+    
+    # Stats
+    total_items = len(products)
+    available = sum(1 for p in products if p.get('Status') == 'Available')
+    sold = sum(1 for p in products if p.get('Status') == 'Sold')
+    reserved = sum(1 for p in products if p.get('Status') == 'Reserved')
+    
+    # Revenue calculations
+    total_revenue = 0
+    total_cost = 0
+    potential_revenue = 0
+    
+    for p in products:
+        price = float(p.get('Price', 0) or 0)
+        cost = float(p.get('Cost Paid', 0) or 0)
+        
+        if p.get('Status') == 'Sold':
+            total_revenue += price
+            total_cost += cost
+        elif p.get('Status') == 'Available':
+            potential_revenue += price
+    
+    total_profit = total_revenue - total_cost
+    avg_margin = ((total_revenue - total_cost) / total_revenue * 100) if total_revenue > 0 else 0
+    
+    # Category breakdown
+    categories = {}
+    for p in products:
+        cat = p.get('Category', 'Unknown')
+        if cat not in categories:
+            categories[cat] = {'count': 0, 'revenue': 0, 'cost': 0}
+        categories[cat]['count'] += 1
+        if p.get('Status') == 'Sold':
+            categories[cat]['revenue'] += float(p.get('Price', 0) or 0)
+            categories[cat]['cost'] += float(p.get('Cost Paid', 0) or 0)
+    
+    for cat in categories:
+        if categories[cat]['revenue'] > 0:
+            categories[cat]['margin'] = ((categories[cat]['revenue'] - categories[cat]['cost']) / 
+                                       categories[cat]['revenue'] * 100)
+        else:
+            categories[cat]['margin'] = 0
+    
+    stats = {
+        'total_items': total_items,
+        'available': available,
+        'sold': sold,
+        'reserved': reserved,
+        'total_revenue': total_revenue,
+        'total_cost': total_cost,
+        'total_profit': total_profit,
+        'potential_revenue': potential_revenue,
+        'avg_margin': avg_margin,
+        'categories': categories,
+    }
+    
+    return render_template('reports.html', stats=stats, **ctx())
+
 # ── Debug ─────────────────────────────────────────────────────────────────────
 @app.route('/debug')
 @login_required

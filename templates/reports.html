@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+
+{% block title %}Reports | {{ store_name }}{% endblock %}
+
+{% block content %}
+<div class="reports">
+    <h1>📊 Revenue Reports</h1>
+    
+    <div class="summary-cards">
+        <div class="card">
+            <div class="card-value">{{ stats.total_items }}</div>
+            <div class="card-label">Total Items</div>
+        </div>
+        <div class="card success">
+            <div class="card-value">{{ stats.sold }}</div>
+            <div class="card-label">Items Sold</div>
+        </div>
+        <div class="card">
+            <div class="card-value">{{ stats.available }}</div>
+            <div class="card-label">Available</div>
+        </div>
+        <div class="card">
+            <div class="card-value">{{ stats.reserved }}</div>
+            <div class="card-label">Reserved</div>
+        </div>
+    </div>
+    
+    <div class="revenue-section">
+        <h2>💰 Revenue Summary</h2>
+        <div class="revenue-grid">
+            <div class="rev-card">
+                <div class="rev-label">Total Revenue (Sold)</div>
+                <div class="rev-value">${{ "%.2f"|format(stats.total_revenue) }}</div>
+            </div>
+            <div class="rev-card">
+                <div class="rev-label">Total Cost</div>
+                <div class="rev-value">${{ "%.2f"|format(stats.total_cost) }}</div>
+            </div>
+            <div class="rev-card profit">
+                <div class="rev-label">Net Profit</div>
+                <div class="rev-value">${{ "%.2f"|format(stats.total_profit) }}</div>
+            </div>
+            <div class="rev-card">
+                <div class="rev-label">Avg Margin</div>
+                <div class="rev-value">{{ "%.1f"|format(stats.avg_margin) }}%</div>
+            </div>
+            <div class="rev-card">
+                <div class="rev-label">Potential Revenue</div>
+                <div class="rev-value">${{ "%.2f"|format(stats.potential_revenue) }}</div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="category-section">
+        <h2>📂 Category Performance</h2>
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Category</th>
+                    <th>Items</th>
+                    <th>Revenue</th>
+                    <th>Cost</th>
+                    <th>Margin</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for cat, data in stats.categories.items()|sort(attribute='1.revenue', reverse=True) %}
+                <tr>
+                    <td>{{ cat }}</td>
+                    <td>{{ data.count }}</td>
+                    <td>${{ "%.2f"|format(data.revenue) }}</td>
+                    <td>${{ "%.2f"|format(data.cost) }}</td>
+                    <td>{{ "%.1f"|format(data.margin) }}%</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<style>
+.reports { max-width: 1200px; margin: 0 auto; padding: 2rem; }
+.summary-cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 2rem; }
+.card { background: #f8f8f8; padding: 1.5rem; border-radius: 8px; text-align: center; }
+.card.success { background: #d4edda; }
+.card-value { font-size: 2rem; font-weight: 700; color: #333; }
+.card.success .card-value { color: #155724; }
+.card-label { color: #666; margin-top: 0.5rem; }
+
+.revenue-section { margin: 2rem 0; }
+.revenue-section h2 { margin-bottom: 1rem; }
+.revenue-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 1rem; }
+.rev-card { background: #fff; padding: 1.5rem; border-radius: 8px; border: 1px solid #eee; text-align: center; }
+.rev-card.profit { background: #d4edda; border-color: #c3e6cb; }
+.rev-label { color: #666; font-size: 0.9rem; }
+.rev-value { font-size: 1.5rem; font-weight: 700; margin-top: 0.5rem; }
+.rev-card.profit .rev-value { color: #155724; }
+
+.category-section { margin-top: 2rem; }
+.category-section h2 { margin-bottom: 1rem; }
+.data-table { width: 100%; border-collapse: collapse; }
+.data-table th, .data-table td { padding: 0.75rem; text-align: left; border-bottom: 1px solid #eee; }
+.data-table th { background: #f8f8f8; font-weight: 600; }
+</style>
+{% endblock %}

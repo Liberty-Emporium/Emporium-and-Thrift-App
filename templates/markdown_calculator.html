@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+
+{% block title %}Markdown Calculator | {{ store_name }}{% endblock %}
+
+{% block content %}
+<div class="markdown-calculator">
+    <h1>🧮 Markdown Calculator</h1>
+    <p class="subtitle">Items that could use a discount based on age</p>
+    
+    {% if products %}
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>SKU</th>
+                <th>Title</th>
+                <th>Current Price</th>
+                <th>Cost</th>
+                <th>Days in Store</th>
+                <th>Suggested</th>
+                <th>New Price</th>
+                <th>Profit</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for p in products %}
+            <tr>
+                <td><a href="{{ url_for('view_product', sku=p.sku) }}">{{ p.sku }}</a></td>
+                <td>{{ p.title }}</td>
+                <td>${{ "%.2f"|format(p.price) }}</td>
+                <td>${{ "%.2f"|format(p.cost) }}</td>
+                <td>{{ p.days_old }} days</td>
+                <td><span class="tag tag-warning">{{ p.suggested_discount }}</span></td>
+                <td><strong>${{ "%.2f"|format(p.new_price) }}</strong></td>
+                <td>${{ "%.2f"|format(p.profit) }}</td>
+                <td>
+                    <form action="{{ url_for('edit_product', sku=p.sku) }}" method="GET">
+                        <button type="submit" class="btn btn-small">Apply</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    
+    <div class="summary-cards">
+        <div class="card">
+            <div class="card-value">{{ products|length }}</div>
+            <div class="card-label">Items to Markdown</div>
+        </div>
+        <div class="card">
+            <div class="card-value">${{ "%.2f"|format(products|sum(attribute='new_price')) }}</div>
+            <div class="card-label">Potential Revenue</div>
+        </div>
+    </div>
+    
+    {% else %}
+    <div class="empty-state">
+        <p>No items need markdown yet! 💪</p>
+        <p>Items older than 30 days will appear here.</p>
+    </div>
+    {% endif %}
+</div>
+
+<style>
+.markdown-calculator { max-width: 1200px; margin: 0 auto; padding: 2rem; }
+.subtitle { color: #666; margin-bottom: 2rem; }
+.data-table { width: 100%; border-collapse: collapse; }
+.data-table th, .data-table td { padding: 0.75rem; text-align: left; border-bottom: 1px solid #eee; }
+.data-table th { background: #f8f8f8; font-weight: 600; }
+.tag { padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.85rem; }
+.tag-warning { background: #fff3cd; color: #856404; }
+.summary-cards { display: flex; gap: 1rem; margin-top: 2rem; }
+.card { background: #f8f8f8; padding: 1.5rem; border-radius: 8px; flex: 1; text-align: center; }
+.card-value { font-size: 1.5rem; font-weight: 700; color: #8B0000; }
+.card-label { color: #666; margin-top: 0.5rem; }
+.empty-state { text-align: center; padding: 3rem; color: #666; }
+</style>
+{% endblock %}
