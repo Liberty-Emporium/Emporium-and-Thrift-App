@@ -20,6 +20,11 @@
     <!-- ──────────────────────────────────────────────────────────────── -->
 
     <style>
+        .dropdown { position: relative; display: inline-block; }
+        .dropdown-content { display: none; position: absolute; background: #8B0000; min-width: 140px; border-radius: 0 0 8px 8px; z-index: 999; }
+        .dropdown:hover .dropdown-content { display: block; }
+        .dropdown-content a { display: block; color: white; padding: 0.6rem 1rem; text-decoration: none; }
+        .dropdown-content a:hover { background: #a00000; }
         .hamburger {
             display: none;
             flex-direction: column;
@@ -52,7 +57,7 @@
                 <a href="{{ url_for('dashboard') }}">Dashboard</a>
                 {% if not session.get('is_guest') %}
                 <a href="{{ url_for('new_product') }}">Add Product</a>
-                <a href="{{ url_for('ad_generator') }}">Ad Generator</a>
+                <div class="dropdown"><a href="#">Ads</a><div class="dropdown-content"><a href="{{ url_for('ad_generator') }}">Generator</a><a href="{{ url_for('ad_gallery') }}">Vault</a><a href="{{ url_for('listing_generator') }}">Listing</a></div></div>
                 <a href="{{ url_for('ad_gallery') }}">Ad Vault</a>
                 <a href="{{ url_for('listing_generator') }}">Listing Generator</a>
                 {% if session.get('username') == 'admin' %}
