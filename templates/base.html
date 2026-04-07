@@ -46,7 +46,7 @@
         .dropdown-content {
             display: none;
             position: absolute;
-            background: #1a1a2e;
+            background: #8B0000;
             min-width: 160px;
             box-shadow: 0 4px 12px rgba(0,0,0,0.3);
             border-radius: 6px;
@@ -76,21 +76,21 @@
                 <a href="{{ url_for('new_product') }}">Add Product</a>
                 
                 <div class="dropdown">
-                    <a href="#">📝 Ads ▽</a>
+                    <a href="#">Ads</a>
                     <div class="dropdown-content">
-                        <a href="{{ url_for('ad_generator') }}">Generator</a>
-                        <a href="{{ url_for('ad_gallery') }}">Vault</a>
-                        <a href="{{ url_for('listing_generator') }}">Listing</a>
+                        <a href="{{ url_for('ad_generator') }}">Ad Generator</a>
+                        <a href="{{ url_for('ad_gallery') }}">Ad Vault</a>
+                        <a href="{{ url_for('listing_generator') }}">Listing Generator</a>
                     </div>
                 </div>
                 
                 {% if session.get('username') == 'admin' %}
                 <div class="dropdown">
-                    <a href="#">📊 Reports ▽</a>
+                    <a href="#">Reports</a>
                     <div class="dropdown-content">
                         <a href="{{ url_for('reports') }}">Revenue</a>
                         <a href="{{ url_for('markdown_calculator') }}">Markdown</a>
-                        <a href="{{ url_for('slow_movers') }}">Slow Movers</a>
+                        <a href="{{ url_for('slow_movers') }}">Slow Movers Movers</a>
                         <a href="{{ url_for('fifo_report') }}">FIFO</a>
                     </div>
                 </div>
