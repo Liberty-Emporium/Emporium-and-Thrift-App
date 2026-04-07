@@ -64,7 +64,7 @@
                 </tr>
             </thead>
             <tbody>
-                {% for cat, data in stats.categories.items()|sort(attribute='1.revenue', reverse=True) %}
+                {% for cat, data in stats.categories.items() %}
                 <tr>
                     <td>{{ cat }}</td>
                     <td>{{ data.count }}</td>
