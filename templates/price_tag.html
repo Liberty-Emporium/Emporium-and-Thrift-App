@@ -2,6 +2,9 @@
 {% block title %}Price Tag - {{ product.Title }} | Liberty Emporium{% endblock %}
 
 {% block content %}
+<style>
+  @import url("https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900family=DM+Sans:wght@300;400;500display=swap");
+</style>
 <div style="max-width:800px; margin:0 auto;">
     <a href="{{ url_for('view_product', sku=product.SKU) }}" class="back-link">&larr; Back to Product</a>
 

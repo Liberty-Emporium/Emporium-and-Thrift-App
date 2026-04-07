@@ -3,6 +3,9 @@
 {% block title %}{% if product.SKU %}Edit Product - {{ product.Title }}{% else %}Add New Product{% endif %} - Liberty Emporium{% endblock %}
 
 {% block content %}
+<style>
+  @import url("https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900family=DM+Sans:wght@300;400;500display=swap");
+</style>
 <div class="form-header">
     <h1>{% if product.SKU %}✏️ Edit Product{% else %}➕ Add New Product{% endif %}</h1>
     <a href="{{ url_for('dashboard') }}" class="btn btn-secondary">← Back to Dashboard</a>
