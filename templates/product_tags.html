@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+
+{% block title %}Product Tags | {{ store_name }}{% endblock %}
+
+{% block content %}
+<div class="product-tags">
+    <h1>🏷️ Condition Tags</h1>
+    <p class="subtitle">Add extra tags to: {{ product.SKU }}</p>
+    
+    <div class="product-preview">
+        <h3>{{ product.Title }}</h3>
+        <p>{{ product.Description }}</p>
+    </div>
+    
+    <form method="POST">
+        <div class="form-group">
+            <label>Available Tags</label>
+            <div class="tags-grid">
+                <label class="tag-checkbox">
+                    <input type="checkbox" name="tags" value="Complete Set">
+                    Complete Set
+                </label>
+                <label class="tag-checkbox">
+                    <input type="checkbox" name="tags" value="Missing Parts">
+                    Missing Parts
+                </label>
+                <label class="tag-checkbox">
+                    <input type="checkbox" name="tags" value="Original Box">
+                    Original Box
+                </label>
+                <label class="tag-checkbox">
+                    <input type="checkbox" name="tags" value="Includes Manual">
+                    Includes Manual
+                </label>
+                <label class="tag-checkbox">
+                    <input type="checkbox" name="tags" value="Brand New">
+                    Brand New
+                </label>
+                <label class="tag-checkbox">
+                    <input type="checkbox" name="tags" value="Vintage">
+                    Vintage
+                </label>
+                <label class="tag-checkbox">
+                    <input type="checkbox" name="tags" value="Rare">
+                    Rare
+                </label>
+                <label class="tag-checkbox">
+                    <input type="checkbox" name="tags" value="Collectible">
+                    Collectible
+                </label>
+            </div>
+        </div>
+        
+        <div class="form-group">
+            <label>Or enter custom tags (comma separated):</label>
+            <input type="text" name="custom_tags" placeholder="e.g., Signed, First Edition, Limited">
+        </div>
+        
+        <button type="submit" class="btn btn-primary">Save Tags</button>
+        <a href="{{ url_for('view_product', sku=product.SKU) }}" class="btn">Cancel</a>
+    </form>
+</div>
+
+<style>
+.product-tags { max-width: 800px; margin: 0 auto; padding: 2rem; }
+.subtitle { color: #666; margin-bottom: 2rem; }
+.product-preview { background: #f8f8f8; padding: 1.5rem; border-radius: 8px; margin-bottom: 2rem; }
+.product-preview h3 { margin: 0 0 0.5rem; }
+.form-group { margin-bottom: 1.5rem; }
+.form-group label { display: block; margin-bottom: 0.5rem; font-weight: 600; }
+.form-group input[type="text"] { width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 4px; }
+
+.tags-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.5rem; }
+.tag-checkbox { 
+    background: #f8f8f8; padding: 0.75rem; border-radius: 4px; cursor: pointer; 
+    text-align: center; transition: background 0.2s;
+}
+.tag-checkbox:hover { background: #e9ecef; }
+.tag-checkbox input { margin-right: 0.5rem; }
+</style>
+{% endblock %}

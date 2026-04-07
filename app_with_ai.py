@@ -1794,6 +1794,156 @@ def fix_images():
     flash(f'Done! Rotated {fixed} image(s). Skipped {skipped} (unreadable).', 'success')
     return redirect(url_for('admin_backups'))
 
+# ── Phase 2: AI Auto-Categorize ──────────────────────────────────────────
+
+@app.route('/ai-categorize', methods=['POST'])
+@login_required
+def ai_categorize():
+    """AI suggests category based on title, description, image"""
+    title = request.form.get('title', '')
+    description = request.form.get('description', '')
+    current_category = request.form.get('category', '')
+    
+    # Use Claude to suggest category
+    prompt = f"""You are a thrift store category expert. A product has:
+- Title: {title}
+- Description: {description[:200] if description else 'None'}
+
+Choose the BEST category from:
+Furniture, Electronics, Clothing, Jewelry, Home Decor, Books, Kitchen, Toys, Tools, Collectibles, Art, Miscellaneous
+
+Respond ONLY with the category name (e.g., "Electronics").
+No explanation needed."""
+
+    try:
+        import requests
+        payload = {
+            'messages': [{'role': 'user', 'content': prompt}],
+            'model': 'claude-haiku-4-5-20251001',
+        }
+        resp = requests.post(
+            'https://openrouter.ai/api/v1/chat/completions',
+            headers={
+                'Authorization': f"Bearer {os.environ.get('OPENROUTER_API_KEY', '')}",
+                'Content-Type': 'application/json',
+            },
+            json=payload,
+            timeout=10
+        )
+        data = resp.json()
+        category = data.get('choices', [{}])[0].get('message', {}).get('content', '').strip()
+        
+        # Validate it's a real category
+        valid_cats = [c.lower() for c in CATEGORIES]
+        if category.lower() not in valid_cats:
+            category = 'Miscellaneous'
+    except:
+        category = current_category or 'Miscellaneous'
+    
+    return jsonify({'category': category})
+
+# ── Phase 2: Slow Mover Alerts ────────────────────────────────────────
+
+@app.route('/slow-movers')
+@login_required
+def slow_movers():
+    products = load_inventory()
+    now = datetime.datetime.now()
+    
+    slow = []
+    for p in products:
+        if p.get('Status') != 'Available':
+            continue
+        date_added = p.get('Date Added', '')
+        if not date_added:
+            continue
+        try:
+            added = datetime.datetime.strptime(date_added, '%Y-%m-%d')
+            days_old = (now - added).days
+            
+            if days_old > 60:  # 60+ days = slow mover
+                slow.append({
+                    'sku': p.get('SKU'),
+                    'title': p.get('Title', '')[:50],
+                    'price': float(p.get('Price', 0) or 0),
+                    'days_old': days_old,
+                    'condition': p.get('Condition', ''),
+                })
+        except:
+            continue
+    
+    slow.sort(key=lambda x: x['days_old'], reverse=True)
+    return render_template('slow_movers.html', products=slow, **ctx())
+
+# ── Phase 2: Multi-Condition Tags ──────────────────────────────────────
+
+# Add condition_tags field to inventory
+@app.route('/product/<sku>/tags', methods=['GET','POST'])
+@login_required
+def product_tags(sku):
+    products = load_inventory()
+    product = next((p for p in products if p['SKU'] == sku), None)
+    
+    if not product:
+        flash('Product not found', 'error')
+        return redirect(url_for('dashboard'))
+    
+    if request.method == 'POST':
+        tags = request.form.get('tags', '')
+        product['condition_tags'] = tags
+        save_inventory(products)
+        flash(f'Tags updated for {sku}', 'success')
+        return redirect(url_for('view_product', sku=sku))
+    
+    return render_template('product_tags.html', product=product, **ctx())
+
+# ── Phase 2: FIFO Report ────────────────────────────────────────────────
+
+@app.route('/fifo')
+@login_required
+def fifo_report():
+    products = load_inventory()
+    now = datetime.datetime.now()
+    
+    oldest = []
+    for p in products:
+        if p.get('Status') != 'Available':
+            continue
+        date_added = p.get('Date Added', '')
+        if not date_added:
+            continue
+        try:
+            added = datetime.datetime.strptime(date_added, '%Y-%m-%d')
+            days_old = (now - added).days
+            
+            cost = float(p.get('Cost Paid', 0) or 0)
+            price = float(p.get('Price', 0) or 0)
+            cost_money_tied = cost > 0
+            
+            oldest.append({
+                'sku': p.get('SKU'),
+                'title': p.get('Title', '')[:50],
+                'price': price,
+                'cost': cost,
+                'days_old': days_old,
+                'date_added': date_added,
+                'cost_money_tied': cost_money_tied,
+            })
+        except:
+            continue
+    
+    oldest.sort(key=lambda x: x['days_old'], reverse=True)
+    
+    # Calculate tied capital
+    total_tied = sum(p['cost'] for p in oldest if p['cost_money_tied'])
+    potential_value = sum(p['price'] for p in oldest if p.get('Status') == 'Available')
+    
+    return render_template('fifo.html', 
+                         products=oldest[:50],  # Top 50 oldest
+                         total_tied=total_tied,
+                         potential_value=potential_value,
+                         **ctx())
+
 # ── Phase 1: AI Pricing & Revenue ─────────────────────────────────────────────
 
 # AI Pricing - Get Claude-suggested price
