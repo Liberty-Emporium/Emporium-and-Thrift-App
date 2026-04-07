@@ -58,8 +58,6 @@
                 {% if not session.get('is_guest') %}
                 <a href="{{ url_for('new_product') }}">Add Product</a>
                 <div class="dropdown"><a href="#">Ads</a><div class="dropdown-content"><a href="{{ url_for('ad_generator') }}">Generator</a><a href="{{ url_for('ad_gallery') }}">Vault</a><a href="{{ url_for('listing_generator') }}">Listing</a></div></div>
-                <a href="{{ url_for('ad_gallery') }}">Ad Vault</a>
-                <a href="{{ url_for('listing_generator') }}">Listing Generator</a>
                 {% if session.get('username') == 'admin' %}
                 <a href="{{ url_for('seasonal_sale') }}">Seasonal Sale</a>
                 {% endif %}
