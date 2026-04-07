@@ -2061,7 +2061,10 @@ def markdown_calculator():
 @app.route('/reports')
 @login_required
 def reports():
-    products = load_inventory()
+    try:
+        products = load_inventory()
+    except Exception as e:
+        return f"Error loading inventory: {e}"
     
     # Stats
     total_items = len(products)
