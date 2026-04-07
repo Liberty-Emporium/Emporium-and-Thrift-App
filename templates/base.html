@@ -102,7 +102,7 @@
     {% if session.get('is_guest') %}
     <div style="background:#fff8e1; border-bottom:2px solid #ffe082; padding:0.6rem 2rem; text-align:center; font-size:0.95rem; color:#7c5a00;">
         👁️ You are browsing as a <strong>Guest</strong> — view only.
-        <a href="{{ url_for('logout') }}" style="color:#2e7d6e; font-weight:600;">Log out</a>
+        <a href="{{ url_for('logout') }}" style="color:#D4A017; font-weight:600;">Log out</a>
     </div>
     {% endif %}
 
@@ -123,9 +123,9 @@
     <footer style="background: linear-gradient(135deg, #8B0000 0%, #a01010 50%, #D4A017 100%); color: white; padding: 1rem; text-align: center;">
         <p>
             Your Store Could Look Like This &mdash; Powered by
-            <a href="mailto:{{ demo_contact_email }}" style="color:#3498db;">Liberty Emporium Programs</a>
+            <a href="mailto:{{ demo_contact_email }}" style="color:#fff;">Liberty Emporium Programs</a>
             &mdash; Want this for your store?
-            <a href="mailto:{{ demo_contact_email }}" style="color:#3498db;">Contact Jay</a>
+            <a href="mailto:{{ demo_contact_email }}" style="color:#fff;">Contact Jay</a>
         </p>
     </footer>
     {% block extra_js %}{% endblock %}
