@@ -37,25 +37,21 @@
 
   .platform-tabs { display:flex; gap:0.5rem; margin-bottom:1.5rem; flex-wrap:wrap; }
   .tab-btn {
-    padding: 0.6rem 1.2rem; border-radius: 8px; border: 2px solid #e0ddd8;
-    background: white; cursor: pointer; font-size: 0.9rem; font-weight: 600;
-    transition: all 0.2s; color: #555;
+    padding: 0.75rem 1.25rem; border-radius: 10px; border: 2px solid #e0ddd8;
+    background: white; cursor: pointer; font-size: 0.875rem; font-weight: 600;
+    transition: all 0.2s; color: #555; display: flex; align-items: center; gap: 0.5rem;
   }
-  .tab-btn:hover  { border-color: #1877f2; color: #1877f2; }
-  .tab-btn.active { background: #1877f2; color: white; border-color: #1877f2; }
-  .tab-btn.fb     { }
-  .tab-btn.cl.active  { background: #7c2d12; border-color: #7c2d12; }
-  .tab-btn.cl:hover   { border-color: #7c2d12; color: #7c2d12; }
-  .tab-btn.ig.active  { background: #c13584; border-color: #c13584; }
-  .tab-btn.ig:hover   { border-color: #c13584; color: #c13584; }
+  .tab-btn:hover  { border-color: #8B0000; background: #f8f7f5; color: #8B0000; }
+  .tab-btn.active { background: #8B0000; color: white; border-color: #8B0000; }
 
   .generate-btn {
-    background: #1877f2; color: white; border: none; padding: 0.85rem 2rem;
-    border-radius: 8px; font-size: 1rem; font-weight: 700; cursor: pointer;
-    transition: background 0.2s; margin-bottom: 1.5rem;
+    background: linear-gradient(135deg, #8B0000 0%, #D4A017 100%);
+    color: white; border: none; padding: 0.9rem 2rem;
+    border-radius: 10px; font-size: 1rem; font-weight: 500; cursor: pointer;
+    transition: all 0.2s; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.5rem;
   }
-  .generate-btn:hover    { background: #1558b0; }
-  .generate-btn:disabled { background: #aaa; cursor: not-allowed; }
+  .generate-btn:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(26,26,46,0.4); }
+  .generate-btn:disabled { opacity: 0.45; cursor: not-allowed; }
 
   .listing-output { display: none; }
   .listing-output.visible { display: block; }
