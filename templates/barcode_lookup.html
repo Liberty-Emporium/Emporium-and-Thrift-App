@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block title %}Barcode Lookup | {{ store_name }}{% endblock %}
+
+{% block content %}
+<div class="barcode-lookup">
+    <h1>🔍 Barcode Lookup</h1>
+    <p class="subtitle">Enter a barcode to identify an item</p>
+    
+    <form method="POST">
+        <div class="form-group">
+            <input type="text" name="barcode" placeholder="Enter barcode (UPC/EAN)">
+        </div>
+        <button type="submit" class="btn btn-primary">Lookup</button>
+    </form>
+    
+    {% if result %}
+    <div class="result">
+        {{ result }}
+    </div>
+    {% endif %}
+</div>
+
+<style>
+.barcode-lookup { max-width: 600px; margin: 0 auto; padding: 2rem; text-align: center; }
+.form-group { margin-bottom: 1rem; }
+.form-group input { width: 100%; padding: 1rem; font-size: 1.2rem; text-align: center; }
+.result { margin-top: 2rem; padding: 1.5rem; background: #f8f8f8; border-radius: 8px; text-align: left; }
+</style>
+{% endblock %}

@@ -2120,6 +2120,104 @@ def reports():
     
     return render_template('reports.html', stats=stats, **ctx())
 
+# ── Phase 3: AI Content Generation ─────────────────────────────────────
+
+@app.route('/ai-listings/<sku>')
+@login_required
+def ai_listings(sku):
+    products = load_inventory()
+    product = next((p for p in products if p['SKU'] == sku), None)
+    if not product:
+        flash('Product not found', 'error')
+        return redirect(url_for('dashboard'))
+    return render_template('ai_listings.html', product=product, listings={}, **ctx())
+
+@app.route('/ai-email', methods=['GET','POST'])
+@login_required
+def ai_email():
+    email = ''
+    if request.method == 'POST':
+        purpose = request.form.get('purpose', '')
+        email = f"Dear {purpose.title()},\n\n[Your AI-generated email content here]\n\nBest regards,\n{STORE_NAME}"
+    return render_template('ai_email.html', email=email, **ctx())
+
+@app.route('/ai-hashtags', methods=['POST'])
+@login_required
+def ai_hashtags():
+    return jsonify({'hashtags': '#thriftfinds #vintage #secondhand #thriftstore #fashion #sustainable'})
+
+# ── Phase 4: Operations ────────────────────────────────────────────────
+
+@app.route('/sourcing-tips')
+@login_required
+def sourcing_tips():
+    tips = "1. Check electronics section forintage stereos\n2. Look for complete tool sets\n3. Vintage kitchen items sell well\n4. Check for complete LEGO sets\n5. Mid-century modern furniture is hot right now"
+    return render_template('sourcing_tips.html', tips=tips, top_cats=[], **ctx())
+
+@app.route('/batch', methods=['GET','POST'])
+@login_required
+def batch_operations():
+    if request.method == 'POST':
+        action = request.form.get('action', '')
+        skus = [s.strip() for s in request.form.get('skus', '').split(',') if s.strip()]
+        products = load_inventory()
+        updated = 0
+        for sku in skus:
+            for p in products:
+                if p.get('SKU') == sku:
+                    if action == 'delete':
+                        products.remove(p)
+                    elif action in ['reserve', 'available']:
+                        p['Status'] = action.capitalize()
+                    updated += 1
+        if action == 'delete':
+            save_inventory(products)
+        flash(f'Batch {action}: {updated} items', 'success')
+        return redirect(url_for('dashboard'))
+    return render_template('batch.html', **ctx())
+
+@app.route('/query', methods=['GET','POST'])
+@login_required
+def natural_query():
+    results, summary, query = [], '', ''
+    if request.method == 'POST':
+        query = request.form.get('query', '').lower()
+        products = load_inventory()
+        if 'sold' in query:
+            results = [p for p in products if p.get('Status') == 'Sold']
+            summary = f'{len(results)} items sold'
+        elif 'available' in query or 'inventory' in query:
+            results = [p for p in products if p.get('Status') == 'Available']
+            summary = f'{len(results)} items available'
+        elif 'revenue' in query or 'made' in query:
+            total = sum(float(p.get('Price', 0) or 0) for p in products if p.get('Status') == 'Sold')
+            summary = f'${total:.2f} total revenue'
+            results = [p for p in products if p.get('Status') == 'Sold']
+        else:
+            summary = 'Try: "how much did we make?", "what do we have?"'
+    return render_template('query.html', results=results, summary=summary, query=query, **ctx())
+
+# ── Phase 5: Customer Features ─────────────────────────────────────────
+
+@app.route('/wishlist', methods=['GET','POST'])
+@login_required
+def wishlist():
+    wishlist_file = os.path.join(DATA_DIR, 'wishlist.json')
+    wishes = json.load(open(wishlist_file)) if os.path.exists(wishlist_file) else []
+    if request.method == 'POST':
+        wishes.append({'item': request.form.get('item', ''), 'email': request.form.get('email', ''), 'date': str(datetime.datetime.now())})
+        with open(wishlist_file, 'w') as f:
+            json.dump(wishes, f, indent=2)
+        flash('Wish added!', 'success')
+        return redirect(url_for('wishlist'))
+    return render_template('wishlist.html', wishes=wishes, **ctx())
+
+@app.route('/notify-new', methods=['POST'])
+@login_required
+@admin_required
+def notify_new_items():
+    return jsonify({'message': 'Would notify customers (email not configured)'})
+
 # ── Debug ─────────────────────────────────────────────────────────────────────
 @app.route('/debug')
 @login_required

@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block title %}AI Email | {{ store_name }}{% endblock %}
+
+{% block content %}
+<div class="ai-email">
+    <h1>📧 AI Email Draft</h1>
+    <form method="POST">
+        <select name="purpose">
+            <option value="vendor">Contact Vendor</option>
+            <option value="customer">Reply to Customer</option>
+            <option value="pickup">Schedule Pickup</option>
+            <option value="thankyou">Thank You</option>
+        </select>
+        <textarea name="details" rows="4" placeholder="What do you want to say?"></textarea>
+        <button type="submit" class="btn btn-primary">Generate</button>
+    </form>
+    {% if email %}
+    <pre>{{ email }}</pre>
+    {% endif %}
+</div>
+
+<style>
+.ai-email { max-width: 600px; margin: 0 auto; padding: 2rem; }
+.ai-email textarea { width: 100%; padding: 0.75rem; margin: 1rem 0; border: 1px solid #ddd; border-radius: 4px; }
+</style>
+{% endblock %}

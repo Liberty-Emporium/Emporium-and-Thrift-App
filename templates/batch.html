@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% block title %}Batch Operations | {{ store_name }}{% endblock %}
+
+{% block content %}
+<div class="batch-ops">
+    <h1>📦 Batch Operations</h1>
+    <form method="POST">
+        <select name="action">
+            <option value="delete">Delete</option>
+            <option value="reserve">Reserve</option>
+            <option value="available">Make Available</option>
+        </select>
+        <textarea name="skus" rows="4" placeholder="SKU001, SKU002, SKU003"></textarea>
+        <button type="submit" class="btn btn-danger">Execute</button>
+    </form>
+</div>
+
+<style>
+.batch-ops { max-width: 600px; margin: 0 auto; padding: 2rem; }
+.batch-ops textarea { width: 100%; padding: 0.75rem; margin: 1rem 0; border: 1px solid #ddd; border-radius: 4px; }
+</style>
+{% endblock %}

@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% block title %}Query | {{ store_name }}{% endblock %}
+
+{% block content %}
+<div class="query-page">
+    <h1>🔎 Ask Anything</h1>
+    <form method="POST">
+        <input type="text" name="query" placeholder="e.g., How much did we make?" value="{{ query or '' }}">
+        <button type="submit" class="btn btn-primary">Search</button>
+    </form>
+    {% if summary %}<div class="summary">{{ summary }}</div>{% endif %}
+</div>
+
+<style>
+.query-page { max-width: 600px; margin: 0 auto; padding: 2rem; }
+.query-page input { width: 70%; padding: 0.75rem; font-size: 1.1rem; }
+.summary { margin: 2rem 0; font-size: 1.5rem; font-weight: 700; color: #8B0000; }
+</style>
+{% endblock %}

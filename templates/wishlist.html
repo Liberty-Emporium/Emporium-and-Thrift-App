@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block title %}Wishlist | {{ store_name }}{% endblock %}
+
+{% block content %}
+<div class="wishlist">
+    <h1>💝 Wishlist</h1>
+    <table class="data-table">
+        <thead><tr><th>Item</th><th>Email</th><th>Date</th></tr></thead>
+        <tbody>
+            {% for w in wishes %}
+            <tr><td>{{ w.item }}</td><td>{{ w.email }}</td><td>{{ w.date[:10] }}</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <hr>
+    <form method="POST">
+        <input type="text" name="item" placeholder="Looking for...">
+        <input type="email" name="email" placeholder="Your email">
+        <button type="submit" class="btn btn-primary">Add</button>
+    </form>
+</div>
+
+<style>
+.wishlist { max-width: 600px; margin: 0 auto; padding: 2rem; }
+.wishlist input { display: block; width: 100%; padding: 0.75rem; margin-bottom: 1rem; border: 1px solid #ddd; }
+</style>
+{% endblock %}
