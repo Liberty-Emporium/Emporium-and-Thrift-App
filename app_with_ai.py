@@ -34,6 +34,19 @@ PENDING_FILE   = os.path.join(DATA_DIR, 'pending_users.json')
 for d in [UPLOAD_FOLDER, BACKUP_FOLDER, ADS_FOLDER, MUSIC_FOLDER]:
     os.makedirs(d, exist_ok=True)
 
+# ── Seed persistent volume on first deploy ────────────────────────────────────
+# If DATA_DIR is a mounted volume, copy seed files from the app bundle
+# only when they don't already exist (so we never overwrite live data).
+def _seed_data_dir():
+    seed_files = ['inventory.csv', 'users.json', 'pending_users.json']
+    for fname in seed_files:
+        dest = os.path.join(DATA_DIR, fname)
+        src  = os.path.join(BASE_DIR, fname)
+        if not os.path.exists(dest) and os.path.exists(src):
+            shutil.copy2(src, dest)
+
+_seed_data_dir()
+
 # ── Config ───────────────────────────────────────────────────────────────────
 STORE_NAME    = 'Liberty Emporium & Thrift'
 DEMO_MODE     = os.environ.get('DEMO_MODE', 'false').lower() == 'true'
